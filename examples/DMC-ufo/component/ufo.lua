@@ -22,7 +22,7 @@ local Objects = require 'dmc_corona.dmc_objects'
 --== Setup, Constants
 
 
--- setup some aliases to make code cleaner
+-- aliases to make code cleaner
 local newClass = Objects.newClass
 local CoronaBase = Objects.CoronaBase
 
@@ -55,7 +55,6 @@ end
 
 
 local UFO = newClass( CoronaBase, { name="Unidentified Flying Object" } )
-
 
 --== Class Constants ==--
 
@@ -204,7 +203,6 @@ function UFO:__undoInitComplete__()
 	--==--
 	self:superCall( '__undoInitComplete__' )
 end
-
 
 -- END: Setup DMC Objects
 --======================================================--
