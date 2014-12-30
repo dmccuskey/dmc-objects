@@ -21,24 +21,27 @@ print( '\n\n##############################################\n\n' )
 local UFOFactory = require 'ufo_class'
 
 
+
 --====================================================================--
 --== Setup, Constants
 
-local seed = os.time();
-math.randomseed( seed )
-local rand = math.random
 
 if system.getInfo('environment') ~= 'simulator' then
 	display.setStatusBar( display.HiddenStatusBar )
 end
 
+local seed = os.time()
+math.randomseed( seed )
+local rand = math.random
+
 local W, H = display.viewableContentWidth, display.viewableContentHeight
 
 -- setup our space background
+local OFFSET = 10 
 local BG, Space = nil, nil 
 
 
-print( W, H )
+
 --====================================================================--
 --== Main
 
@@ -50,8 +53,7 @@ print( "Creating Space" )
 BG = display.newImageRect( 'assets/space_bg.png', W, H )
 BG.x, BG.y = W/2, H/2
 
-Space = display.newRect( 0, 0, display.viewableContentWidth,
-	display.viewableContentHeight )
+Space = display.newRect( 0, 0, W, H )
 Space:setFillColor( 0, 0, 0, 0 )
 Space.anchorX, Space.anchorY = 0, 0
 
@@ -64,10 +66,10 @@ UFOFactory.setSpace( Space )
 print( "Creating UFOs" )
 
 local ufo = UFOFactory.create()
-ufo.x, ufo.y = rand(10, 300), rand(10, 470)
+ufo.x, ufo.y = rand(0+OFFSET, W-OFFSET), rand(0+OFFSET, H-OFFSET)
  
 local ufo2 = UFOFactory.create()
-ufo2.x, ufo2.y = rand(10, 300), rand(10, 470)
+ufo2.x, ufo2.y = rand(0+OFFSET, W-OFFSET), rand(0+OFFSET, H-OFFSET)
 
 
 --== Destroy UFOs ==--
