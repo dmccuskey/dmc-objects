@@ -7,24 +7,27 @@
 
 --[[
 
-Copyright (C) 2011-2014 David McCuskey. All Rights Reserved.
+The MIT License (MIT)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in the
-Software without restriction, including without limitation the rights to use, copy,
-modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
-and to permit persons to whom the Software is furnished to do so, subject to the
-following conditions:
+Copyright (c) 2011-2015 David McCuskey
 
-The above copyright notice and this permission notice shall be included in all copies
-or substantial portions of the Software.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
-FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 --]]
 
@@ -37,7 +40,7 @@ DEALINGS IN THE SOFTWARE.
 
 -- Semantic Versioning Specification: http://semver.org/
 
-local VERSION = "1.1.0"
+local VERSION = "2.0.0"
 
 
 
@@ -49,10 +52,25 @@ local VERSION = "1.1.0"
 --====================================================================--
 --== Support Functions
 
-local Utils = {} -- make copying from dmc_utils easier
 
+local Utils = {} -- make copying from Utils easier
+
+
+--== Start: copy from lua_utils ==--
+
+-- extend()
+-- Copy key/values from one table to another
+-- Will deep copy any value from first table which is itself a table.
+--
+-- @param fromTable the table (object) from which to take key/value pairs
+-- @param toTable the table (object) in which to copy key/value pairs
+-- @return table the table (object) that received the copied items
+--
 function Utils.extend( fromTable, toTable )
 
+	if not fromTable or not toTable then
+		error( "table can't be nil" )
+	end
 	function _extend( fT, tT )
 
 		for k,v in pairs( fT ) do
@@ -76,6 +94,9 @@ function Utils.extend( fromTable, toTable )
 	return _extend( fromTable, toTable )
 end
 
+--== End: copy from lua_utils ==--
+
+
 
 --====================================================================--
 --== Configuration
@@ -85,7 +106,7 @@ local dmc_lib_data, dmc_lib_info
 -- boot dmc_library with boot script or
 -- setup basic defaults if it doesn't exist
 --
-if false == pcall( function() require( "dmc_corona_boot" ) end ) then
+if false == pcall( function() require( 'dmc_corona_boot' ) end ) then
 	_G.__dmc_corona = {
 		dmc_corona={},
 	}
@@ -104,6 +125,7 @@ dmc_lib_info = dmc_lib_data.dmc_library
 --====================================================================--
 --== Configuration
 
+
 dmc_lib_data.dmc_objects = dmc_lib_data.dmc_objects or {}
 
 local DMC_OBJECTS_DEFAULTS = {
@@ -112,27 +134,155 @@ local DMC_OBJECTS_DEFAULTS = {
 local dmc_objects_data = Utils.extend( dmc_lib_data.dmc_objects, DMC_OBJECTS_DEFAULTS )
 
 
+
 --====================================================================--
 --== Imports
 
-local LuaObject = require 'lua_objects'
-local Utils = require 'dmc_utils'
+
+local LuaObject = require 'lib.dmc_lua.lua_objects'
+local EventsMixModule = require 'lib.dmc_lua.lua_events_mix'
+
 
 
 --====================================================================--
 --== Setup, Constants
 
+
 -- setup some aliases to make code cleaner
-local inheritsFrom = LuaObject.inheritsFrom
-local ObjectBase = LuaObject.ObjectBase
+local newClass = LuaObject.newClass
+local Class = LuaObject.Class
+local registerCtorName = LuaObject.registerCtorName
+local registerDtorName = LuaObject.registerDtorName
+
+local EventsMix = EventsMixModule.EventsMix
+
+
+-- Add new Dtor name (function references)
+registerDtorName( 'removeSelf', Class )
+
 
 
 --====================================================================--
 --== Support Functions
 
+
 _G.getDMCObject = function( object )
-	return object.__dmc_ref
+	local ref = object.__dmc_ref
+	assert( ref, "No reference to DMC Object" )
+	return ref
 end
+
+
+
+
+--====================================================================--
+--== Object Base Class
+--====================================================================--
+
+
+local ObjectBase = newClass( { Class, EventsMix }, { name="Object Class" } )
+
+
+
+--======================================================--
+--== Constructor / Destructor
+
+
+-- __new__()
+-- this method drives the construction flow for DMC-style objects
+-- typically, you won't override this
+--
+function ObjectBase:__new__( ... )
+
+	--== Do setup sequence ==--
+
+	self:__init__( ... )
+
+	-- skip these if a Class object (ie, NOT an instance)
+	if rawget( self, '__is_class' ) == false then
+		self:__initComplete__()
+	end
+
+	return self
+end
+
+
+-- __destroy__()
+-- this method drives the destruction flow for DMC-style objects
+-- typically, you won't override this
+--
+function ObjectBase:__destroy__()
+
+	--== Do teardown sequence ==--
+
+	-- skip these if a Class object (ie, NOT an instance)
+	if rawget( self, '__is_class' ) == false then
+		self:__undoInitComplete__()
+	end
+
+	self:__undoInit__()
+end
+
+
+
+--======================================================--
+-- Start: Setup Lua Objects
+
+-- __init__
+-- initialize the object
+--
+function ObjectBase:__init__( ... )
+	-- self:superCall( Class, '__init__', ... )
+	self:superCall( EventsMix, '__init__', ... )
+	--==--
+end
+
+-- __undoInit__
+-- remove items added during __init__
+--
+function ObjectBase:__undoInit__()
+	self:superCall( EventsMix, '__undoInit__' )
+	-- self:superCall( Class, '__undoInit__' )
+end
+
+
+-- __initComplete__
+-- any setup after object is done with __init__
+--
+function ObjectBase:__initComplete__()
+end
+
+-- __undoInitComplete__()
+-- remove any items added during __initComplete__
+--
+function ObjectBase:__undoInitComplete__()
+end
+
+-- END: Setup Lua Objects
+--======================================================--
+
+
+
+--====================================================================--
+--== Public Methods
+
+
+-- none
+
+
+
+--====================================================================--
+--== Private Methods
+
+
+
+--====================================================================--
+--== Event Handlers
+
+-- none
+
+
+
 
 
 
@@ -141,10 +291,10 @@ end
 --====================================================================--
 
 
-local CoronaBase = inheritsFrom( ObjectBase )
-CoronaBase.NAME = "Corona Base"
+local CoronaBase = newClass( ObjectBase, { name="Corona Base" } )
 
---== Class Constants
+
+--== Class Constants ==--
 
 --references for setAnchor()
 CoronaBase.TopLeftReferencePoint = { 0, 0 }
@@ -163,101 +313,125 @@ CoronaBase.CORONA_EVENT_DISPATCH = 'corona_event_style_dispatch'
 
 
 
--- new()
--- class constructor
+
+--======================================================--
+--== Constructor / Destructor
+
+
+
+-- __new__()
+-- this method drives the construction flow for DMC-style objects
+-- typically, you won't override this
 --
-function CoronaBase:new( params )
-	params = params or {}
-	params.__set_intermediate = params.__set_intermediate == true and true or false
-	--==--
+function CoronaBase:__new__( ... )
 
-	local o = self:_bless()
+	--== Do setup sequence ==--
 
-	-- set flag if this is an Intermediate class
-	o.is_intermediate = params.__set_intermediate
-	params.__set_intermediate = nil
+	self:__init__( ... )
 
-	-- configure the type of event dispatch
-	o._dispatch_type = params.dispatch_type == nil and CoronaBase.DMC_EVENT_DISPATCH or params.dispatch_type
-
-	-- go through setup sequence
-	o:_init( params )
-	-- skip these if we're an intermediate class (eg, subclass)
-	if rawget( o, 'is_intermediate' ) == false then
-		o:_createView()
-		o:_initComplete()
+	-- skip these if a Class object (ie, NOT an instance)
+	if rawget( self, '__is_class' ) == false then
+		self:__createView__()
+		self:__initComplete__()
 	end
 
-	return o
+	return self
+end
+
+-- __destroy__()
+-- this method drives the destruction flow for DMC-style objects
+-- typically, you won't override this
+--
+function CoronaBase:__destroy__()
+
+	-- skip these if we're an intermediate class (eg, subclass)
+	if rawget( self, '__is_class' ) == false then
+		self:__undoInitComplete__()
+		self:__undoCreateView__()
+	end
+
+	self:__undoInit__()
 end
 
 
---====================================================================--
---== Start: Setup DMC Objects
 
--- _init()
--- initialize the object - setting the view
+--======================================================--
+-- Start: Setup DMC Objects
+
+-- __init__()
+-- initialize the object
 --
-function CoronaBase:_init( options )
-	self:superCall( "_init" )
+function CoronaBase:__init__( ... )
+	self:superCall( '__init__', ... )
 	--==--
-	--== Create Properties ==--
-	--== Display Groups ==--
-	--== Object References ==--
-
-	-- create our class view container
 	self:_setView( display.newGroup() )
-
 end
--- _undoInit()
--- remove items added during _init()
+
+-- __undoInit__()
+-- de-initialize the object
 --
-function CoronaBase:_undoInit( options )
+function CoronaBase:__undoInit__()
 	self:_unsetView()
 	--==--
-	self:superCall( "_undoInit" )
+	self:superCall( '__undoInit__' )
 end
 
 
 -- _createView()
 -- create any visual items specific to object
 --
-function CoronaBase:_createView()
-	self:superCall( "_createView" )
-	-- Subclasses should call self:superCall( "_createView" )
+function CoronaBase:__createView__()
+	-- Subclasses should call:
+	-- self:superCall( '__createView__' )
 	--==--
 end
+
 -- _undoCreateView()
 -- remove any items added during _createView()
 --
-function CoronaBase:_undoCreateView()
+function CoronaBase:__undoCreateView__()
 	--==--
-	-- Subclasses should call self:superCall( "_undoCreateView" )
-	self:superCall( "_undoCreateView" )
+	-- Subclasses should call:
+	-- self:superCall( '__undoCreateView__' )
 end
 
 
--- _initComplete()
--- any setup after object is done being created
+--[[
+
+-- __initComplete__()
+-- do final setup after view creation
 --
-function CoronaBase:_initComplete()
-	self:superCall( "_initComplete" )
+function CoronaBase:__initComplete__()
+	self:superCall( '__initComplete__' )
 	--==--
-end
--- _undoInitComplete()
--- remove any items added during _initComplete()
---
-function CoronaBase:_undoInitComplete()
-	--==--
-	self:superCall( "_undoInitComplete" )
 end
 
---== END: Setup DMC Objects
+-- __undoInitComplete__()
+-- remove final setup before view destruction
+--
+function CoronaBase:__undoInitComplete__()
+	--==--
+	self:superCall( '__undoInitComplete__' )
+end
+
+--]]
+
+-- END: Setup DMC Objects
+--======================================================--
+
+
+
 --====================================================================--
+--== Public Methods
+
+
+-- none
+
 
 
 --====================================================================--
 --== Private Methods
+
 
 -- _setView( viewObject )
 -- set the view property to incoming view object
@@ -294,17 +468,18 @@ function CoronaBase:_unsetView()
 end
 
 
+
 --====================================================================--
 --== Public Methods / Corona API
 
 
 function CoronaBase:setTouchBlock( o )
-	assert( o, 'setTouchBlock: expected object' )
+	assert( o, "setTouchBlock: expected object" )
 	o.touch = function(e) return true end
 	o:addEventListener( 'touch', o )
 end
 function CoronaBase:unsetTouchBlock( o )
-	assert( o, 'unsetTouchBlock: expected object' )
+	assert( o, "unsetTouchBlock: expected object" )
 	if o and o.touch then
 		o:removeEventListener( 'touch', o )
 		o.touch = nil
@@ -582,7 +757,6 @@ CoronaBase._buildDmcEvent = ObjectBase._buildDmcEvent
 -- can either be dmc style event
 -- or corona style event
 function CoronaBase:dispatchEvent( ... )
-	-- print( 'CoronaBase:dispatchEvent', self._dispatch_type)
 	if self._dispatch_type == CoronaBase.CORONA_EVENT_DISPATCH then
 		self.view:dispatchEvent( ... )
 	else
@@ -601,19 +775,6 @@ function CoronaBase:removeEventListener( ... )
 	self.view:removeEventListener( ... )
 end
 
--- removeSelf()
---
-function CoronaBase:removeSelf()
-	-- print( "\nOVERRIDE: removeSelf()\n" );
-
-	-- skip these if we're an intermediate class (eg, subclass)
-	if rawget( self, 'is_intermediate' ) == false then
-		self:_undoInitComplete()
-		self:_undoCreateView()
-	end
-
-	self:_undoInit()
-end
 -- rotate( deltaAngle )
 --
 function CoronaBase:rotate( ... )
@@ -669,9 +830,9 @@ end
 
 --[[
 
--- =========================================================
--- CoronaPhysics Class
--- =========================================================
+--====================================================================--
+--== CoronaPhysics Class
+--====================================================================--
 
 
 local CoronaPhysics = inheritsFrom( CoronaBase )
@@ -810,7 +971,9 @@ end
 
 
 -- simply add to current exports
+LuaObject.ObjectBase = ObjectBase
 LuaObject.CoronaBase = CoronaBase
+
 
 
 return LuaObject
