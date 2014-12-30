@@ -55,8 +55,6 @@ end
 --====================================================================--
 
 
---[[
---]]
 
 function test_objectBaseBasics()
 
@@ -72,6 +70,7 @@ function test_objectBaseBasics()
 	assert_equal( type(rawget(ObjectBase, '__undoInitComplete__')), 'function', "should be function" )
 
 end
+
 
 
 function test_eventMixinBasics()
@@ -143,8 +142,6 @@ function test_basicObjectBase()
 end 
 
 
---[[
---]]
 
 function test_basicObjectBaseInheritance()
 

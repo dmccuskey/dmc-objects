@@ -11,7 +11,7 @@
 
 
 --====================================================================--
---== Imports and Setup
+--== Imports
 
 
 local Objects = require 'dmc_corona.dmc_objects'
