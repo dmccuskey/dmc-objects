@@ -141,7 +141,7 @@ function Events.__init__( self, params )
 end
 
 function Events.__undoInit__( self )
-	print( "Events.__undoInit__" )
+	-- print( "Events.__undoInit__" )
 	self.__event_listeners = nil
 	self.__debug_on = nil 
 	self.__event_func = nil
