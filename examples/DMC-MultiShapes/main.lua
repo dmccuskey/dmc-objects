@@ -33,7 +33,7 @@ ShapeFactory = require 'component.shapes'
 --== Setup, Constants
 
 
-local rand = math.random
+local mrand = math.random
 local tinsert = table.insert
 local tremove = table.remove
 
@@ -85,12 +85,12 @@ local function drawShapes()
 
 	for i=1, NUM_SHAPES do
 		local shape = ShapeFactory.create( nil, {
-				color={ rand(), rand(), rand() }
+				color={ mrand(), mrand(), mrand() }
 			}
 		)
 		tinsert( shapeList, shape )
 		shapeGroup:insert( shape.display )
-		local x, y, rotate = rand( CONTENT_W ), rand( CONTENT_H-100 )
+		local x, y, rotate = mrand( CONTENT_W ), mrand( CONTENT_H-100 )
 		shape.x, shape.y = x, y
 	end
 
