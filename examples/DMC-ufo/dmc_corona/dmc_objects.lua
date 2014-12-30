@@ -40,7 +40,7 @@ SOFTWARE.
 
 -- Semantic Versioning Specification: http://semver.org/
 
-local VERSION = "1.1.0"
+local VERSION = "2.0.0"
 
 
 
@@ -232,7 +232,10 @@ end
 -- initialize the object
 --
 function ObjectBase:__init__( ... )
+	--[[
+	there is no __init__ on Class
 	-- self:superCall( Class, '__init__', ... )
+	--]]
 	self:superCall( EventsMix, '__init__', ... )
 	--==--
 end
@@ -242,7 +245,10 @@ end
 --
 function ObjectBase:__undoInit__()
 	self:superCall( EventsMix, '__undoInit__' )
+	--[[
+	there is no __undoInit__ on Class
 	-- self:superCall( Class, '__undoInit__' )
+	--]]
 end
 
 
@@ -291,7 +297,7 @@ end
 --====================================================================--
 
 
-local CoronaBase = newClass( ObjectBase, { name="Corona Base" } )
+local CoronaBase = newClass( ObjectBase, { name="Corona Class" } )
 
 
 --== Class Constants ==--
