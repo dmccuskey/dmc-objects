@@ -18,7 +18,8 @@ print( '\n\n##############################################\n\n' )
 --== Imports
 
 
-local UFOFactory = require 'ufo_class'
+-- our custom class
+local UFOFactory = require 'component.ufo'
 
 
 
@@ -50,7 +51,7 @@ local BG, Space = nil, nil
 
 print( "Creating Space" )
 
-BG = display.newImageRect( 'assets/space_bg.png', W, H )
+BG = display.newImageRect( 'asset/space_bg.png', W, H )
 BG.x, BG.y = W/2, H/2
 
 Space = display.newRect( 0, 0, W, H )

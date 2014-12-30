@@ -40,6 +40,9 @@ local rand = math.random
 --== Support Functions
 
 
+-- setSpace()
+-- allows input of Space object
+--
 local function setSpace( obj )
 	SPACE_BOUNDS = obj
 end
@@ -56,12 +59,16 @@ local UFO = newClass( CoronaBase, { name="Unidentified Flying Object" } )
 
 --== Class Constants ==--
 
-UFO.COOL_IMG = 'assets/ufo_cool.png'
-UFO.WARM_IMG = 'assets/ufo_warm.png'
-UFO.HOT_IMG = 'assets/ufo_hot.png'
+-- "temperature" of UFO
+UFO.COOL_IMG = 'asset/ufo_cool.png'
+UFO.WARM_IMG = 'asset/ufo_warm.png'
+UFO.HOT_IMG = 'asset/ufo_hot.png'
+
+-- dimensions of UFO
 UFO.IMG_W = 110
 UFO.IMG_H = 65
 
+-- transition time
 UFO.TRANSITION_TIME = 1500
 UFO.CHANGE_TIME = 4000
 
