@@ -1,6 +1,5 @@
 # Examples Overview #
 
-## Folder `dmc_objects/` ##
 
 * **Corona-Graphics-Fishies**
 
@@ -31,44 +30,10 @@
 
 * **DMC-ufo**
 
-	UFOs fly randomly around the screen. They turn different colors depending on their speed - the faster they go, the hotter the ship's material becomes.
+	UFOs fly randomly around the screen. They turn different colors depending on their speed - the faster they go, the "hotter" the ship's material becomes.
 
 	_This is a simple, but complete example of using `dmc_objects`._
 
 	Tags: OOD/OOP
 
-
-
-## Folder `dmc_buttons/` ##
-
-* **dmc-AppTabNav**
-
-	This is an example of using the Radio Group to create tab navigation for a mobile app.
-
-	_Even though we're using the Director library to switch screens, we control layering so that we only create one button group, but still retain Director functionality._
-
-	Tags: Director, Radio Group, custom buttons
-
-
-
-
-## Folder `dmc_trajectory/` ##
-
-* **DMC-trajectory-basic**
-
-	Shows simple trajectory with a single object.
-
-	Tags: ballistic trajectory
-
-* **DMC-trajectory-multiple**
-
-	This is an example which shows three projectiles being simultaneously fired around a 3x3 grid.
-
-	Tags: ballistic trajectory
-
-* **DMC-trajectory-direction**
-
-	Shows example of how to setup dmc_trajectory with objects that face either left or right.
-
-	Tags: ballistic trajectory
 
