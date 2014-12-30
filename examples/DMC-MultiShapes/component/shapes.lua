@@ -1,5 +1,5 @@
 --====================================================================--
--- Shapes 1 Class
+-- Shapes 1 Class - Lines
 --
 -- by David McCuskey
 --
@@ -35,6 +35,7 @@ local mrand = math.random
 --====================================================================--
 --== Base Shapes Class (lines)
 --====================================================================--
+
 
 local Shape = newClass( CoronaBase, { name="Shape Base" } )
 

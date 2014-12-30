@@ -1,5 +1,5 @@
 --====================================================================--
--- Shapes 1 Class
+-- Shapes 2 Class - Images
 --
 -- by David McCuskey
 --
