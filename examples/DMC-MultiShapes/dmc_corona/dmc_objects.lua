@@ -58,6 +58,17 @@ local Utils = {} -- make copying from Utils easier
 
 --== Start: copy from lua_utils ==--
 
+
+function Utils.createObjectCallback( object, method )
+	assert( object ~= nil, "missing object in Utils.createObjectCallback" )
+	assert( method ~= nil, "missing method in Utils.createObjectCallback" )
+	--==--
+	return function( ... )
+		return method( object, ... )
+	end
+end
+
+
 -- extend()
 -- Copy key/values from one table to another
 -- Will deep copy any value from first table which is itself a table.
@@ -273,7 +284,11 @@ end
 --== Public Methods
 
 
--- none
+function ObjectBase:createCallback( method )
+	return Utils.createObjectCallback( self, method )	
+end
+
+
 
 
 
