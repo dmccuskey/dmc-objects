@@ -291,7 +291,7 @@ end
 --====================================================================--
 
 
-local CoronaBase = newClass( ObjectBase, { name="Corona Base" } )
+local CoronaBase = newClass( ObjectBase, { name="Corona Class" } )
 
 
 --== Class Constants ==--
