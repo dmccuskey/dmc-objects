@@ -24,7 +24,7 @@ local Objects = require 'dmc_corona.dmc_objects'
 
 -- setup some aliases to make code cleaner
 local newClass = Objects.newClass
-local CoronaBase = Objects.CoronaBase
+local ComponentBase = Objects.ComponentBase
 
 local mrand = math.random
 
@@ -60,7 +60,7 @@ end
 --====================================================================--
 
 
-local UFO = newClass( CoronaBase, { name="Unidentified Flying Object" } )
+local UFO = newClass( ComponentBase, { name="Unidentified Flying Object" } )
 
 --== Class Constants ==--
 
