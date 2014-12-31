@@ -736,49 +736,16 @@ end
 
 -- Methods --
 
-
--- addEventListener( eventName, handler )
---
-function CoronaBase:addEventListener( ... )
-	local args = { ... }
-	if args[1] == nil then
-		error( "ERROR addEventListener: event type can't be nil", 2 )
-	end
-	if args[2] == nil then
-		error( "ERROR addEventListener: listener function can't be nil", 2 )
-	end
-
-	self.view:addEventListener( ... )
-end
-
 -- contentToLocal( x_content, y_content )
 --
 function CoronaBase:contentToLocal( ... )
 	self.view:contentToLocal( ... )
 end
 
-CoronaBase._buildDmcEvent = ObjectBase._buildDmcEvent
-
--- dispatchEvent( event info )
--- can either be dmc style event
--- or corona style event
-function CoronaBase:dispatchEvent( ... )
-	if self._dispatch_type == CoronaBase.CORONA_EVENT_DISPATCH then
-		self.view:dispatchEvent( ... )
-	else
-		self.view:dispatchEvent( self:_buildDmcEvent( ... ) )
-	end
-end
 -- localToContent( x, y )
 --
 function CoronaBase:localToContent( ... )
 	self.view:localToContent( ... )
-end
-
--- removeEventListener( eventName, handler )
---
-function CoronaBase:removeEventListener( ... )
-	self.view:removeEventListener( ... )
 end
 
 -- rotate( deltaAngle )
