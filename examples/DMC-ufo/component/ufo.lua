@@ -24,7 +24,7 @@ local Objects = require 'dmc_corona.dmc_objects'
 
 -- aliases to make code cleaner
 local newClass = Objects.newClass
-local CoronaBase = Objects.CoronaBase
+local ComponentBase = Objects.ComponentBase
 
 -- setup the bounding area for the ships
 local SPACE_BOUNDS = display.newRect( 120, 120, display.viewableContentWidth,
@@ -54,7 +54,7 @@ end
 --====================================================================--
 
 
-local UFO = newClass( CoronaBase, { name="Unidentified Flying Object" } )
+local UFO = newClass( ComponentBase, { name="Unidentified Flying Object" } )
 
 --== Class Constants ==--
 
