@@ -168,7 +168,7 @@ end
 --== Public Methods
 
 
-function EventsMix:createCallback( method )
+function Events:createCallback( method )
 	return Utils.createObjectCallback( self, method )	
 end
 
