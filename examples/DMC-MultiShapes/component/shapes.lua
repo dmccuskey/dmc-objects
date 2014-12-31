@@ -26,7 +26,7 @@ local Objects = require 'dmc_corona.dmc_objects'
 local newClass = Objects.newClass
 local CoronaBase = Objects.CoronaBase
 
--- save local copy of math.random
+-- save local copy of calls
 local mfloor = math.floor
 local mrand = math.random
 
