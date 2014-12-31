@@ -40,7 +40,7 @@ SOFTWARE.
 
 -- Semantic Versioning Specification: http://semver.org/
 
-local VERSION = "2.0.1"
+local VERSION = "2.1.0"
 
 
 
@@ -297,26 +297,21 @@ end
 --====================================================================--
 
 
-local CoronaBase = newClass( ObjectBase, { name="Corona Class" } )
+local ComponentBase = newClass( ObjectBase, { name="Component Class" } )
 
 
 --== Class Constants ==--
 
 --references for setAnchor()
-CoronaBase.TopLeftReferencePoint = { 0, 0 }
-CoronaBase.TopCenterReferencePoint = { 0.5, 0 }
-CoronaBase.TopRightReferencePoint = { 1, 0 }
-CoronaBase.CenterLeftReferencePoint = { 0, 0.5 }
-CoronaBase.CenterReferencePoint = { 0.5, 0.5 }
-CoronaBase.CenterRightReferencePoint = { 1, 0.5 }
-CoronaBase.BottomLeftReferencePoint = { 0, 1 }
-CoronaBase.BottomCenterReferencePoint = { 0.5, 1 }
-CoronaBase.BottomRightReferencePoint = { 1, 1 }
-
--- style of event dispatch
-CoronaBase.DMC_EVENT_DISPATCH = 'dmc_event_style_dispatch'
-CoronaBase.CORONA_EVENT_DISPATCH = 'corona_event_style_dispatch'
-
+ComponentBase.TopLeftReferencePoint = { 0, 0 }
+ComponentBase.TopCenterReferencePoint = { 0.5, 0 }
+ComponentBase.TopRightReferencePoint = { 1, 0 }
+ComponentBase.CenterLeftReferencePoint = { 0, 0.5 }
+ComponentBase.CenterReferencePoint = { 0.5, 0.5 }
+ComponentBase.CenterRightReferencePoint = { 1, 0.5 }
+ComponentBase.BottomLeftReferencePoint = { 0, 1 }
+ComponentBase.BottomCenterReferencePoint = { 0.5, 1 }
+ComponentBase.BottomRightReferencePoint = { 1, 1 }
 
 
 
@@ -324,12 +319,11 @@ CoronaBase.CORONA_EVENT_DISPATCH = 'corona_event_style_dispatch'
 --== Constructor / Destructor
 
 
-
 -- __new__()
 -- this method drives the construction flow for DMC-style objects
 -- typically, you won't override this
 --
-function CoronaBase:__new__( ... )
+function ComponentBase:__new__( ... )
 
 	--== Do setup sequence ==--
 
@@ -344,11 +338,12 @@ function CoronaBase:__new__( ... )
 	return self
 end
 
+
 -- __destroy__()
 -- this method drives the destruction flow for DMC-style objects
 -- typically, you won't override this
 --
-function CoronaBase:__destroy__()
+function ComponentBase:__destroy__()
 
 	-- skip these if we're an intermediate class (eg, subclass)
 	if rawget( self, '__is_class' ) == false then
@@ -360,14 +355,13 @@ function CoronaBase:__destroy__()
 end
 
 
-
 --======================================================--
 -- Start: Setup DMC Objects
 
 -- __init__()
 -- initialize the object
 --
-function CoronaBase:__init__( ... )
+function ComponentBase:__init__( ... )
 	self:superCall( '__init__', ... )
 	--==--
 	self:_setView( display.newGroup() )
@@ -376,7 +370,7 @@ end
 -- __undoInit__()
 -- de-initialize the object
 --
-function CoronaBase:__undoInit__()
+function ComponentBase:__undoInit__()
 	self:_unsetView()
 	--==--
 	self:superCall( '__undoInit__' )
@@ -386,7 +380,7 @@ end
 -- _createView()
 -- create any visual items specific to object
 --
-function CoronaBase:__createView__()
+function ComponentBase:__createView__()
 	-- Subclasses should call:
 	-- self:superCall( '__createView__' )
 	--==--
@@ -395,7 +389,7 @@ end
 -- _undoCreateView()
 -- remove any items added during _createView()
 --
-function CoronaBase:__undoCreateView__()
+function ComponentBase:__undoCreateView__()
 	--==--
 	-- Subclasses should call:
 	-- self:superCall( '__undoCreateView__' )
@@ -407,7 +401,7 @@ end
 -- __initComplete__()
 -- do final setup after view creation
 --
-function CoronaBase:__initComplete__()
+function ComponentBase:__initComplete__()
 	self:superCall( '__initComplete__' )
 	--==--
 end
@@ -415,7 +409,7 @@ end
 -- __undoInitComplete__()
 -- remove final setup before view destruction
 --
-function CoronaBase:__undoInitComplete__()
+function ComponentBase:__undoInitComplete__()
 	--==--
 	self:superCall( '__undoInitComplete__' )
 end
@@ -443,7 +437,7 @@ end
 -- set the view property to incoming view object
 -- remove current if already set, only check direct property, not hierarchy
 --
-function CoronaBase:_setView( viewObject )
+function ComponentBase:_setView( viewObject )
 	self:_unsetView()
 
 	self.view = viewObject
@@ -455,7 +449,7 @@ end
 -- _unsetView()
 -- remove the view property
 --
-function CoronaBase:_unsetView()
+function ComponentBase:_unsetView()
 	if rawget( self, 'view' ) ~= nil then
 		local view = self.view
 
@@ -479,12 +473,12 @@ end
 --== Public Methods / Corona API
 
 
-function CoronaBase:setTouchBlock( o )
+function ComponentBase:setTouchBlock( o )
 	assert( o, "setTouchBlock: expected object" )
 	o.touch = function(e) return true end
 	o:addEventListener( 'touch', o )
 end
-function CoronaBase:unsetTouchBlock( o )
+function ComponentBase:unsetTouchBlock( o )
 	assert( o, "unsetTouchBlock: expected object" )
 	if o and o.touch then
 		o:removeEventListener( 'touch', o )
@@ -494,7 +488,7 @@ end
 
 
 
-function CoronaBase.__setters:dispatch_type( value )
+function ComponentBase.__setters:dispatch_type( value )
 	self._dispatch_type = value
 end
 
@@ -502,14 +496,14 @@ end
 -- destroy()
 -- remove the view object from the stage
 --
-function CoronaBase:destroy()
+function ComponentBase:destroy()
 	self:removeSelf()
 end
 
-function CoronaBase:show()
+function ComponentBase:show()
 	self.view.isVisible = true
 end
-function CoronaBase:hide()
+function ComponentBase:hide()
 	self.view.isVisible = false
 end
 
@@ -523,7 +517,7 @@ end
 
 -- numChildren
 --
-function CoronaBase.__getters:numChildren()
+function ComponentBase.__getters:numChildren()
 	return self.view.numChildren
 end
 
@@ -532,12 +526,12 @@ end
 
 -- insert( [index,] child, [, resetTransform]  )
 --
-function CoronaBase:insert( ... )
+function ComponentBase:insert( ... )
 	self.view:insert( ... )
 end
 -- remove( indexOrChild )
 --
-function CoronaBase:remove( ... )
+function ComponentBase:remove( ... )
 	self.view:remove( ... )
 end
 
@@ -548,188 +542,188 @@ end
 
 -- alpha
 --
-function CoronaBase.__getters:alpha()
+function ComponentBase.__getters:alpha()
 	return self.view.alpha
 end
-function CoronaBase.__setters:alpha( value )
+function ComponentBase.__setters:alpha( value )
 	self.view.alpha = value
 end
 -- contentBounds
 --
-function CoronaBase.__getters:contentBounds()
+function ComponentBase.__getters:contentBounds()
 	return self.view.contentBounds
 end
 -- contentHeight
 --
-function CoronaBase.__getters:contentHeight()
+function ComponentBase.__getters:contentHeight()
 	return self.view.contentHeight
 end
 -- contentWidth
 --
-function CoronaBase.__getters:contentWidth()
+function ComponentBase.__getters:contentWidth()
 	return self.view.contentWidth
 end
 -- height
 --
-function CoronaBase.__getters:height()
+function ComponentBase.__getters:height()
 	return self.view.height
 end
-function CoronaBase.__setters:height( value )
+function ComponentBase.__setters:height( value )
 	self.view.height = value
 end
 -- isHitTestMasked
 --
-function CoronaBase.__getters:isHitTestMasked()
+function ComponentBase.__getters:isHitTestMasked()
 	return self.view.isHitTestMasked
 end
-function CoronaBase.__setters:isHitTestMasked( value )
+function ComponentBase.__setters:isHitTestMasked( value )
 	self.view.isHitTestMasked = value
 end
 -- isHitTestable
 --
-function CoronaBase.__getters:isHitTestable()
+function ComponentBase.__getters:isHitTestable()
 	return self.view.isHitTestable
 end
-function CoronaBase.__setters:isHitTestable( value )
+function ComponentBase.__setters:isHitTestable( value )
 	self.view.isHitTestable = value
 end
 -- isVisible
 --
-function CoronaBase.__getters:isVisible()
+function ComponentBase.__getters:isVisible()
 	return self.view.isVisible
 end
-function CoronaBase.__setters:isVisible( value )
+function ComponentBase.__setters:isVisible( value )
 	self.view.isVisible = value
 end
 -- maskRotation
 --
-function CoronaBase.__getters:maskRotation()
+function ComponentBase.__getters:maskRotation()
 	return self.view.maskRotation
 end
-function CoronaBase.__setters:maskRotation( value )
+function ComponentBase.__setters:maskRotation( value )
 	self.view.maskRotation = value
 end
 -- maskScaleX
 --
-function CoronaBase.__getters:maskScaleX()
+function ComponentBase.__getters:maskScaleX()
 	return self.view.maskScaleX
 end
-function CoronaBase.__setters:maskScaleX( value )
+function ComponentBase.__setters:maskScaleX( value )
 	self.view.maskScaleX = value
 end
 -- maskScaleY
 --
-function CoronaBase.__getters:maskScaleY()
+function ComponentBase.__getters:maskScaleY()
 	return self.view.maskScaleY
 end
-function CoronaBase.__setters:maskScaleY( value )
+function ComponentBase.__setters:maskScaleY( value )
 	self.view.maskScaleY = value
 end
 -- maskX
 --
-function CoronaBase.__getters:maskX()
+function ComponentBase.__getters:maskX()
 	return self.view.maskX
 end
-function CoronaBase.__setters:maskX( value )
+function ComponentBase.__setters:maskX( value )
 	self.view.maskX = value
 end
 -- maskY
 --
-function CoronaBase.__getters:maskY()
+function ComponentBase.__getters:maskY()
 	return self.view.maskY
 end
-function CoronaBase.__setters:maskY( value )
+function ComponentBase.__setters:maskY( value )
 	self.view.maskY = value
 end
 -- parent
 --
-function CoronaBase.__getters:parent()
+function ComponentBase.__getters:parent()
 	return self.view.parent
 end
 -- rotation
 --
-function CoronaBase.__getters:rotation()
+function ComponentBase.__getters:rotation()
 	return self.view.rotation
 end
-function CoronaBase.__setters:rotation( value )
+function ComponentBase.__setters:rotation( value )
 	self.view.rotation = value
 end
 -- stageBounds
 --
-function CoronaBase.__getters:stageBounds()
+function ComponentBase.__getters:stageBounds()
 	print( "\nDEPRECATED: object.stageBounds - use object.contentBounds\n" )
 	return self.view.stageBounds
 end
 -- width
 --
-function CoronaBase.__getters:width()
+function ComponentBase.__getters:width()
 	return self.view.width
 end
-function CoronaBase.__setters:width( value )
+function ComponentBase.__setters:width( value )
 	self.view.width = value
 end
 -- x
 --
-function CoronaBase.__getters:x()
+function ComponentBase.__getters:x()
 	return self.view.x
 end
-function CoronaBase.__setters:x( value )
+function ComponentBase.__setters:x( value )
 	self.view.x = value
 end
 -- xOrigin
 --
-function CoronaBase.__getters:xOrigin()
+function ComponentBase.__getters:xOrigin()
 	return self.view.xOrigin
 end
-function CoronaBase.__setters:xOrigin( value )
+function ComponentBase.__setters:xOrigin( value )
 	self.view.xOrigin = value
 end
 -- xReference
 --
-function CoronaBase.__getters:xReference()
+function ComponentBase.__getters:xReference()
 	return self.view.xReference
 end
-function CoronaBase.__setters:xReference( value )
+function ComponentBase.__setters:xReference( value )
 	self.view.xReference = value
 end
 -- xScale
 --
-function CoronaBase.__getters:xScale()
+function ComponentBase.__getters:xScale()
 	return self.view.xScale
 end
-function CoronaBase.__setters:xScale( value )
+function ComponentBase.__setters:xScale( value )
 	self.view.xScale = value
 end
 -- y
 --
-function CoronaBase.__getters:y()
+function ComponentBase.__getters:y()
 	return self.view.y
 end
-function CoronaBase.__setters:y( value )
+function ComponentBase.__setters:y( value )
 	self.view.y = value
 end
 -- yOrigin
 --
-function CoronaBase.__getters:yOrigin()
+function ComponentBase.__getters:yOrigin()
 	return self.view.yOrigin
 end
-function CoronaBase.__setters:yOrigin( value )
+function ComponentBase.__setters:yOrigin( value )
 	self.view.yOrigin = value
 end
 -- yReference
 --
-function CoronaBase.__getters:yReference()
+function ComponentBase.__getters:yReference()
 	return self.view.yReference
 end
-function CoronaBase.__setters:yReference( value )
+function ComponentBase.__setters:yReference( value )
 	self.view.yReference = value
 end
 -- yScale
 --
-function CoronaBase.__getters:yScale()
+function ComponentBase.__getters:yScale()
 	return self.view.yScale
 end
-function CoronaBase.__setters:yScale( value )
+function ComponentBase.__setters:yScale( value )
 	self.view.yScale = value
 end
 
@@ -738,30 +732,30 @@ end
 
 -- contentToLocal( x_content, y_content )
 --
-function CoronaBase:contentToLocal( ... )
+function ComponentBase:contentToLocal( ... )
 	self.view:contentToLocal( ... )
 end
 
 -- localToContent( x, y )
 --
-function CoronaBase:localToContent( ... )
+function ComponentBase:localToContent( ... )
 	self.view:localToContent( ... )
 end
 
 -- rotate( deltaAngle )
 --
-function CoronaBase:rotate( ... )
+function ComponentBase:rotate( ... )
 	self.view:rotate( ... )
 end
 -- scale( sx, sy )
 --
-function CoronaBase:scale( ... )
+function ComponentBase:scale( ... )
 	self.view:scale( ... )
 end
 
 -- setAnchor
 --
-function CoronaBase:setAnchor( ... )
+function ComponentBase:setAnchor( ... )
 	local args = {...}
 	if type( args[2] ) == 'table' then
 		self.view.anchorX, self.view.anchorY = unpack( args[2] )
@@ -773,28 +767,28 @@ function CoronaBase:setAnchor( ... )
 		self.view.anchorY = args[3]
 	end
 end
-function CoronaBase:setMask( ... )
+function ComponentBase:setMask( ... )
 	print( "\nWARNING: setMask( mask ) not tested \n" );
 	self.view:setMask( ... )
 end
 -- setReferencePoint( referencePoint )
 --
-function CoronaBase:setReferencePoint( ... )
+function ComponentBase:setReferencePoint( ... )
 	self.view:setReferencePoint( ... )
 end
 -- toBack()
 --
-function CoronaBase:toBack()
+function ComponentBase:toBack()
 	self.view:toBack()
 end
 -- toFront()
 --
-function CoronaBase:toFront()
+function ComponentBase:toFront()
 	self.view:toFront()
 end
 -- translate( deltaX, deltaY )
 --
-function CoronaBase:translate( ... )
+function ComponentBase:translate( ... )
 	self.view:translate( ... )
 end
 
@@ -808,7 +802,7 @@ end
 --====================================================================--
 
 
-local CoronaPhysics = inheritsFrom( CoronaBase )
+local CoronaPhysics = inheritsFrom( ComponentBase )
 CoronaPhysics.NAME = "Corona Physics"
 
 
@@ -945,7 +939,7 @@ end
 
 -- simply add to current exports
 LuaObject.ObjectBase = ObjectBase
-LuaObject.CoronaBase = CoronaBase
+LuaObject.ComponentBase = ComponentBase
 
 
 
