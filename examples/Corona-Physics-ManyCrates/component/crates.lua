@@ -57,6 +57,7 @@ function CrateBase:__init__( params )
 	self.bounce = nil
 
 end
+
 -- reverse init() setup
 function CrateBase:__undoInit__()
 	self.density = nil
