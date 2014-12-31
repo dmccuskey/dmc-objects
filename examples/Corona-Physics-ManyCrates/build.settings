@@ -1,25 +1,10 @@
 settings =
 {
-
-	orientation =
+	android =
 	{
-		default = "portrait",
-		supported =
+		usesPermissions =
 		{
-		"portrait",
+			"android.permission.INTERNET",
 		},
-
-	},
-
-	iphone =
-	{
-		plist =
-		{
-	        CFBundleIconFile = "Icon.png",
-	        CFBundleIconFiles = {
-	           "Icon.png",
-	           "Icon@2x.png",
-	        },
-		},
-	}
+	},  -- end Android
 }

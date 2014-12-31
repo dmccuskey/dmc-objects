@@ -1,9 +1,15 @@
-application = 
+--====================================================================--
+-- Config.lua
+--====================================================================--
+
+
+application =
 {
-	content = 
-	{ 
+	content =
+	{
 		width = 320,
-		height = 480, 
-		scale = "zoomEven"
-	}
+		height = 480,
+		scale = "letterbox",
+	},
+	showRuntimeErrors = false
 }
