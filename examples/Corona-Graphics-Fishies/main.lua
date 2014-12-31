@@ -1,43 +1,77 @@
-print(" ------------------------------------------------ ")
-
 --====================================================================--
--- Imports
---====================================================================--
-
-local FishStore = require( "fish_store" )
-local FishTank = require( "fish_tank" )
-
-
---====================================================================--
--- Setup, Constants
+-- Corona Fishies Example
+--
+-- by David McCuskey
+--
+-- Sample code is MIT licensed, the same license which covers Lua itself
+-- http://en.wikipedia.org/wiki/MIT_License
+-- Copyright (C) 2011-2015 David McCuskey. All Rights Reserved.
 --====================================================================--
 
-local seed = os.time();
-math.randomseed( seed )
 
-if system.getInfo("environment") ~= 'simulator' then
-	display.setStatusBar( display.HiddenStatusBar )
-end
+
+print( '\n\n##############################################\n\n' )
+
+
+
+--====================================================================--
+--== Imports
+
+
+local FishStore = require 'component.fish_store'
+local FishTank = require 'component.fish_tank'
+
+
+
+--====================================================================--
+--== Setup, Constants
+
+
+local mrand = math.random
+
+local W, H = display.viewableContentWidth, display.viewableContentHeight
+local H_CENTER, V_CENTER = W*0.5, H*0.5
 
 -- how many fish in the tank
+local NUM_FISH = 10
 
-local numFish = 10
+display.setStatusBar( display.HiddenStatusBar )
+
 
 
 --====================================================================--
--- Main
+--== Support Functions
+
+
+-- a better random seed
+local function seedRandom()
+	local seed = tostring( os.time() ) .. tostring( system.getTimer() )
+	seed = string.sub( seed, 5 )
+	math.randomseed( seed )
+end
+
+
+
+--====================================================================--
+--== Main
 --====================================================================--
 
--- create our brand new fish tank
 
-local myFishTank = FishTank:new()
+local function main()
 
+	seedRandom()
 
--- get some fish for it
+	-- create our brand new fish tank
+	local myFishTank = FishTank:new()
+	myFishTank.x, myFishTank.y = H_CENTER, V_CENTER
 
-for i=1, numFish do
-
-	local fish = FishStore.buyFish()
-	myFishTank:addFish( fish )
+	-- get some fish for it
+	for i=1, NUM_FISH do
+		local fish = FishStore.buyFish()
+		myFishTank:addFish( fish )
+	end
 
 end
+
+
+main()

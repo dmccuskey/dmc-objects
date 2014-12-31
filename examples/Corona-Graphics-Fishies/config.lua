@@ -1,4 +1,7 @@
--- config.lua
+--====================================================================--
+-- Config.lua
+--====================================================================--
+
 
 application =
 {
@@ -6,6 +9,7 @@ application =
 	{
 		width = 320,
 		height = 480,
-		scale = "letterbox" 
+		scale = "letterBox",
 	},
+	showRuntimeErrors = false
 }
