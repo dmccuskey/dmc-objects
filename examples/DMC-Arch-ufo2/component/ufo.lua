@@ -1,26 +1,43 @@
+--====================================================================--
+-- UFO Class
+--
+-- by David McCuskey
+--
+-- Sample code is MIT licensed, the same license which covers Lua itself
+-- http://en.wikipedia.org/wiki/MIT_License
+-- Copyright (C) 2011-2015 David McCuskey. All Rights Reserved.
+--====================================================================--
+
+
 
 --====================================================================--
--- Imports
---====================================================================--
-
-local Objects = require( "dmc_objects" )
+--== Imports
 
 
+local Objects = require 'dmc_corona.dmc_objects'
+
+
+
 --====================================================================--
--- Module Setup, Constants, & Support
---====================================================================--
+--== Setup, Constants
+
 
 -- setup some aliases to make code cleaner
-local inheritsFrom = Objects.inheritsFrom
+local newClass = Objects.newClass
 local CoronaBase = Objects.CoronaBase
 
+local mrand = math.random
 
-local rand = math.random
+
+
+--====================================================================--
+--== Support Functions
 
 
 local function getRandomNumber( lower, upper )
-	return math.random( lower, upper )
+	return mrand( lower, upper )
 end
+
 
 -- calculate time for given distance and velocity
 --
@@ -39,13 +56,13 @@ end
 
 
 --====================================================================--
--- UFO class
+--== UFO class
 --====================================================================--
 
-local UFO = inheritsFrom( CoronaBase )
-UFO.NAME = "Unidentified Flying Object"
 
---== Class constants
+local UFO = newClass( CoronaBase, { name="Unidentified Flying Object" } )
+
+--== Class Constants ==--
 
 UFO.IMG_W = 110
 UFO.IMG_H = 65
@@ -63,32 +80,29 @@ UFO.SPEEDS[UFO.MEDIUM] = 150
 UFO.SPEEDS[UFO.SLOW] = 50
 
 -- images for each speed
-UFO.COOL_IMG = "assets/ufo_cool.png"
-UFO.WARM_IMG = "assets/ufo_warm.png"
-UFO.HOT_IMG = "assets/ufo_hot.png"
+UFO.COOL_IMG = "asset/ufo_cool.png"
+UFO.WARM_IMG = "asset/ufo_warm.png"
+UFO.HOT_IMG = "asset/ufo_hot.png"
 
 
---== Event Constants
+--== Event Constants ==--
+
 UFO.EVENT = "ufo_event"
 UFO.TOUCHED = "ufo_touched_event"
 
 
-
-
---== Start: Setup DMC Objects
+--======================================================--
+-- Start: Setup DMC Objects
 
 -- initialize and list class properties
 --
-function UFO:_init( params )
-	self:superCall( "_init", params )
+function UFO:__init__( params )
+	self:superCall( '__init__', params )
 	--==--
 
 	--== Create Properties ==--
 
 	self._transition = nil -- handle to a currently running transition
-
-
-	--== Display Groups ==--
 
 	--== Object References ==--
 
@@ -97,38 +111,31 @@ function UFO:_init( params )
 
 end
 
-function UFO:_undoInit()
-
-	--== Object References ==--
+function UFO:__undoInit__()
 
 	self._ufo_bg = nil
 	self._ufo_views = nil
 
-	--== Display Groups ==--
-
-	--== Create Properties ==--
-
 	self._transition = nil
 
 	--==--
-	self:superCall( "_undoInit" )
+	self:superCall( '__undoInit__' )
 end
 
 
 -- create view elements for UFO
 --
-function UFO:_createView()
-	self:superCall( "_createView" )
+function UFO:__createView__()
+	self:superCall( '__createView__' )
 	--==--
 
 	local ufo_views = self._ufo_views -- make code easier to read
 	local o
 
-
 	--== Setup background
 
 	o = display.newRect( 0, 0, UFO.IMG_W, UFO.IMG_H )
-	o:setReferencePoint(display.CenterReferencePoint)
+	o.anchorX, o.anchorY = 0.5, 0.5
 	o.x, o.y = 0, 0
 	o.alpha = 0.05 -- just enough to allow a tap
 
@@ -163,12 +170,12 @@ end
 
 -- remove all display elements during destruction
 --
-function UFO:_undoCreateView()
+function UFO:__undoCreateView__()
 
 	local ufo_views = self._ufo_views -- make code easier to read
 	local o
 
-	--== Remove UFO Images
+	-- Remove UFO Images
 
 	o = ufo_views[UFO.SLOW]
 	ufo_views[UFO.SLOW] = nil
@@ -182,30 +189,28 @@ function UFO:_undoCreateView()
 	ufo_views[UFO.FAST] = nil
 	o:removeSelf()
 
-
-	--== Remove Background
+	-- Remove Background
 
 	o = self._ufo_bg 
 	self._ufo_bg = nil
 	o:removeSelf()
 
-
 	--==--
-	self:superCall( "_undoCreateView" )
+	self:superCall( '__undoCreateView__' )
 end
 
 
 -- do final setup after create
 -- 
-function UFO:_initComplete()
-	self:superCall( "_initComplete" )
+function UFO:__initComplete__()
+	self:superCall( '__initComplete__' )
 	--==--
 
 	local o
 
 	-- watch for touches on background
 	o = self._ufo_bg
-	o:addEventListener( "touch", self )
+	o:addEventListener( 'touch', self )
 
 	-- show our "resting" image
 	self._ufo_views[UFO.SLOW].isVisible = true
@@ -215,30 +220,26 @@ function UFO:_initComplete()
 
 end
 
-function UFO:_undoInitComplete()
+function UFO:__undoInitComplete__()
 
 	local o
 
 	o = self._ufo_bg
-	o:removeEventListener( "touch", self )
+	o:removeEventListener( 'touch', self )
 
 	self:_stopAnimation()
 
-
 	--==--
-	self:superCall( "_undoInitComplete" )
+	self:superCall( '__undoInitComplete__' )
 end
 
-
-
---== END: Setup DMC Objects
-
-
+-- END: Setup DMC Objects
+--======================================================--
 
 
 
+--====================================================================--
 --== Public Methods
-
 
 
 -- animate to new, random location
@@ -258,9 +259,8 @@ end
 
 
 
-
+--====================================================================--
 --== Private Methods
-
 
 
 -- get random x,y coordinates
@@ -331,7 +331,7 @@ end
 
 
 
-
+--====================================================================--
 --== Event Handlers
 
 
@@ -339,26 +339,11 @@ end
 --
 function UFO:touch( event )
 	if event.phase == 'ended' then 
-		self:_dispatchEvent( UFO.TOUCHED )
+		self:dispatchEvent( UFO.TOUCHED )
 	end
 	return true
 end
 
-
--- event dispatch helper
---
-function UFO:_dispatchEvent( e_type, data )
-
-	-- setup custom event
-	local e = {
-		name = UFO.EVENT,
-		type = e_type,
-		target = self,
-		data = data
-	}
-
-	self:dispatchEvent( e )
-end
 
 
 

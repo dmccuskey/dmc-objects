@@ -1,5 +1,5 @@
 --====================================================================--
--- UFO2
+-- UFO2 OOP Example
 --
 -- by David McCuskey
 --
@@ -8,31 +8,31 @@
 -- Copyright (C) 2011 David McCuskey. All Rights Reserved.
 --====================================================================--
 
-print("------------------------------------------------")
 
 
---====================================================================--
--- Imports
---====================================================================--
+print( '\n\n##############################################\n\n' )
 
-local widget = require( "widget" )
-local UFOFactory = require( "ufo" )
 
 
 --====================================================================--
--- Setup, Constants
+--== Imports
+
+
+local widget = require 'widget'
+local UFOFactory = require 'component.ufo'
+
+
+
 --====================================================================--
+--== Setup, Constants
 
--- hide status bar
-if system.getInfo("environment") ~= 'simulator' then
-	display.setStatusBar( display.HiddenStatusBar )
-end
 
-local seed = os.time();
-math.randomseed( seed )
-local rand = math.random
+local mrand = math.random
 
 local MAX_UFOS = 5
+local W, H = display.viewableContentWidth, display.viewableContentHeight
+local H_CENTER, V_CENTER = W*0.5, H*0.5
+
 
 -- display groups, this order
 local bg_group
@@ -41,19 +41,41 @@ local ui_group
 
 local ufo_dict
 
-local handleUFOTouchedEvent -- forward declare function
+local createUFO, deleteUFO
+local ufoTouch_handler -- forward declare function
+
+display.setStatusBar( display.HiddenStatusBar )
 
 
 
 --====================================================================--
--- Main
---====================================================================--
+--== Support Functions
 
 
---== Support functions
+-- a better random seed
+local function seedRandom()
+	local seed = tostring( os.time() ) .. tostring( system.getTimer() )
+	seed = string.sub( seed, 5 )
+	math.randomseed( seed )
+end
 
 
-local function createUFO()
+
+--== Event Handlers
+
+
+ufoTouch_handler = function( event )
+	-- print( "ufoTouch_handler" )
+	deleteUFO( event.target )
+end
+
+
+
+--== Setup App Layers
+
+
+createUFO = function()
+	-- print( "createUFO" )
 
 	local ufo, key
 
@@ -62,7 +84,7 @@ local function createUFO()
 	ufo_group:insert( ufo.view )
 
 	-- event listener
-	ufo:addEventListener( ufo.EVENT, handleUFOTouchedEvent )
+	ufo:addEventListener( ufo.EVENT, ufoTouch_handler )
 
 	-- storage
 	key = tostring( ufo )
@@ -70,7 +92,8 @@ local function createUFO()
 
 end
 
-local function deleteUFO( ufo )
+deleteUFO = function( ufo )
+	-- print( "deleteUFO" )
 
 	local key
 
@@ -79,7 +102,7 @@ local function deleteUFO( ufo )
 	ufo_dict[ key ] = nil
 
 	-- event listener
-	ufo:removeEventListener( ufo.EVENT, handleUFOTouchedEvent )
+	ufo:removeEventListener( ufo.EVENT, ufoTouch_handler )
 
 	-- object
 	ufo:removeSelf()
@@ -88,55 +111,13 @@ end
 
 
 
-
---== Event Handlers
-
-
-handleUFOTouchedEvent = function( event )
-	deleteUFO( event.target )
-end
-
-
-local function handleCreateButtonEvent( event )
-	if "ended" == event.phase then
-		createUFO()
-	end
-	return true
-end
-
-local function handleMoveButtonEvent( event )
-	if "ended" == event.phase then
-		local speeds = { UFOFactory.FAST, UFOFactory.MEDIUM, UFOFactory.SLOW }
-
-		-- loop through all ufo objects,
-		-- get random speed and ask ufo to move()
-		-- with that speed
-		for k, ufo in pairs( ufo_dict ) do 
-			local idx = math.random(#speeds)
-			ufo:move( speeds[ idx ] )
-ufo.xScale, ufo.yScale=0.5, 0.5
-ufo.xScale, ufo.yScale=0.5, 0.5
-ufo.xScale, ufo.yScale=1.0, 1.0
-ufo.xScale, ufo.yScale=40.0, 40.0
-ufo.xScale, ufo.yScale=1.0, 1.0
-		end
-	end
-	return true
-end
-
-
-
-
---== Setup App Layers
-
-
 local function setupBackgroundLayer()
 
 	bg_group = display.newGroup()
 
 	-- create space background
-	local o = display.newImageRect( "assets/space_bg.png", display.viewableContentWidth, display.viewableContentHeight )
-	o.x, o.y = display.viewableContentWidth/2, display.viewableContentHeight/2
+	local o = display.newImageRect( 'asset/space_bg.png', W, H )
+	o.x, o.y = H_CENTER, V_CENTER
 
 	bg_group:insert( o )
 
@@ -144,25 +125,44 @@ end
 
 
 local function setupUFOLayer()
-
 	ufo_group = display.newGroup()
-
 end
 
 
 local function setupUILayer()
 
-	local H_CENTER = display.viewableContentWidth/2
 	local PADDING = 15
 
 	-- button constants
 	local w, h = 120, 45
-	local y = display.viewableContentHeight-h-PADDING
+	local y = H-h-PADDING
 
 	local o 
 
 
 	ui_group = display.newGroup()
+
+
+	local createButtonTouch_handler = function( event )
+		createUFO()
+		return true
+	end
+
+	local moveButtonTouch_handler = function( event )
+
+		local speeds = { UFOFactory.FAST, UFOFactory.MEDIUM, UFOFactory.SLOW }
+
+		-- loop through all ufo objects,
+		-- get random speed and ask ufo to move()
+		-- with that speed
+		for k, ufo in pairs( ufo_dict ) do 
+			local idx = mrand(#speeds)
+			ufo:move( speeds[ idx ] )
+		end
+
+		return true
+	end
+
 
 
 	-- move button
@@ -173,7 +173,9 @@ local function setupUILayer()
 		width = w,
 		height = h,
 		label = "Create",
-		onEvent = handleCreateButtonEvent,
+		font=system.nativeFontBold,
+		fontSize=24,
+		onRelease = createButtonTouch_handler,
 	}
 	ui_group:insert( o )
 
@@ -185,13 +187,19 @@ local function setupUILayer()
 		width = w,
 		height = h,
 		label = "Move",
-		onEvent = handleMoveButtonEvent,
+		font=system.nativeFontBold,
+		fontSize=24,
+		onRelease = moveButtonTouch_handler,
 	}
 	ui_group:insert( o )
 
 end
 
 
+
+--====================================================================--
+--== Main
+--====================================================================--
 
 
 local function main()
@@ -207,7 +215,4 @@ end
 
 
 main()
-
-
-
 
