@@ -39,7 +39,7 @@ SOFTWARE.
 
 -- Semantic Versioning Specification: http://semver.org/
 
-local VERSION = "0.2.0"
+local VERSION = "0.2.1"
 
 
 
@@ -124,6 +124,7 @@ function _patch( obj )
 
 	-- add properties
 	Events.__init__( obj )
+	obj.EVENT = Events.EVENT -- generic event name
 
 	-- add methods
 	obj.dispatchEvent = Events.dispatchEvent
@@ -187,6 +188,7 @@ function Events:createCallback( method )
 end
 
 function Events.setDebug( self, value )
+	assert( type(value) == 'boolean', "setDebug requires boolean" )
 	self.__debug_on = value
 end
 
