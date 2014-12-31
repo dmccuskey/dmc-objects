@@ -24,7 +24,7 @@ local Objects = require 'dmc_corona.dmc_objects'
 
 -- aliases to make code cleaner
 local newClass = Objects.newClass
-local CoronaBase = Objects.CoronaBase
+local ComponentBase = Objects.ComponentBase
 
 -- save local copy of math.random
 local mfloor = math.floor
@@ -37,7 +37,7 @@ local mrand = math.random
 --====================================================================--
 
 
-local Shape = newClass( CoronaBase, { name="Shape Base" } )
+local Shape = newClass( ComponentBase, { name="Shape Base" } )
 
 --== Class Constants ==--
 
