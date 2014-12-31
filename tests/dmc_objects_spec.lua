@@ -29,7 +29,7 @@ local Objects = require 'dmc_objects'
 
 local newClass = Objects.newClass
 local ObjectBase = Objects.ObjectBase
-local CoronaBase = Objects.CoronaBase
+local ComponentBase = Objects.ComponentBase
 
 
 
@@ -288,16 +288,16 @@ end
 
 
 --====================================================================--
---== CoronaBase Testing
+--== ComponentBase Testing
 --====================================================================--
 
 
 function test_coronaBaseBasics()
 
-	assert_equal( CoronaBase.NAME, "Corona Class", "name is incorrect" )
-	assert_equal( type(CoronaBase.new), 'function', "should be function" )
+	assert_equal( ComponentBase.NAME, "Component Class", "name is incorrect" )
+	assert_equal( type(ComponentBase.new), 'function', "should be function" )
 
-	assert_equal( type(CoronaBase.isa), 'function', "should be function" )
+	assert_equal( type(ComponentBase.isa), 'function', "should be function" )
 
 end
 
