@@ -89,7 +89,7 @@ local function drawShapes()
 			}
 		)
 		tinsert( shapeList, shape )
-		shapeGroup:insert( shape.display )
+		shapeGroup:insert( shape.view )
 		local x, y, rotate = mrand( CONTENT_W ), mrand( CONTENT_H-100 )
 		shape.x, shape.y = x, y
 	end
