@@ -730,16 +730,36 @@ end
 
 -- Methods --
 
+-- addEventListener( event, listener )
+--
+function ComponentBase:addEventListener( ... )
+	self.view:addEventListener( ... )
+end
+
 -- contentToLocal( x_content, y_content )
 --
 function ComponentBase:contentToLocal( ... )
 	self.view:contentToLocal( ... )
 end
 
+-- dispatchEvent( event )
+--
+function ComponentBase:dispatchEvent( ... )
+	local evt = EventsMixModule.dmcEventFunc( ... )
+	print( evt )
+	self.display:dispatchEvent( evt )
+end
+
 -- localToContent( x, y )
 --
 function ComponentBase:localToContent( ... )
 	self.view:localToContent( ... )
+end
+
+-- removeEventListener( eventName, listener )
+--
+function ComponentBase:removeEventListener( ... )
+	self.display:removeEventListener( ... )
 end
 
 -- rotate( deltaAngle )
