@@ -1,8 +1,7 @@
 --====================================================================--
 -- dmc_objects.lua
 --
--- by David McCuskey
--- Documentation: http://docs.davidmccuskey.com/display/docs/dmc_objects.lua
+-- Documentation: http://docs.davidmccuskey.com/
 --====================================================================--
 
 --[[
@@ -103,7 +102,7 @@ end
 
 local dmc_lib_data, dmc_lib_info
 
--- boot dmc_library with boot script or
+-- boot dmc_corona with boot script or
 -- setup basic defaults if it doesn't exist
 --
 if false == pcall( function() require( 'dmc_corona_boot' ) end ) then
@@ -113,7 +112,6 @@ if false == pcall( function() require( 'dmc_corona_boot' ) end ) then
 end
 
 dmc_lib_data = _G.__dmc_corona
-dmc_lib_info = dmc_lib_data.dmc_library
 
 
 
@@ -730,16 +728,36 @@ end
 
 -- Methods --
 
+-- addEventListener( event, listener )
+--
+function ComponentBase:addEventListener( ... )
+	self.view:addEventListener( ... )
+end
+
 -- contentToLocal( x_content, y_content )
 --
 function ComponentBase:contentToLocal( ... )
 	self.view:contentToLocal( ... )
 end
 
+-- dispatchEvent( event )
+--
+function ComponentBase:dispatchEvent( ... )
+	local evt = EventsMixModule.dmcEventFunc( ... )
+	print( evt )
+	self.display:dispatchEvent( evt )
+end
+
 -- localToContent( x, y )
 --
 function ComponentBase:localToContent( ... )
 	self.view:localToContent( ... )
+end
+
+-- removeEventListener( eventName, listener )
+--
+function ComponentBase:removeEventListener( ... )
+	self.display:removeEventListener( ... )
 end
 
 -- rotate( deltaAngle )
