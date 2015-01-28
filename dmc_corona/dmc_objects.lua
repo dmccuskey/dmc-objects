@@ -745,7 +745,6 @@ end
 --
 function ComponentBase:dispatchEvent( ... )
 	local evt = EventsMixModule.dmcEventFunc( ... )
-	print( evt )
 	self.display:dispatchEvent( evt )
 end
 
