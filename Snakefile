@@ -19,26 +19,26 @@ module_config = {
 		]
 	},
 	"examples": {
-		"dir": "examples",
+		"base_dir": "examples",
 		"apps": [
 			{
-				"dir": "Corona-Graphics-Fishies",
+				"exp_dir": "Corona-Graphics-Fishies",
 				"requires": []
 			},
 			{
-				"dir": "Corona-Physics-ManyCrates",
+				"exp_dir": "Corona-Physics-ManyCrates",
 				"requires": []
 			},
 			{
-				"dir": "DMC-Arch-ufo2",
+				"exp_dir": "DMC-Arch-ufo2",
 				"requires": []
 			},
 			{
-				"dir": "DMC-MultiShapes",
+				"exp_dir": "DMC-MultiShapes",
 				"requires": []
 			},
 			{
-				"dir": "DMC-ufo",
+				"exp_dir": "DMC-ufo",
 				"requires": []
 			}
 		]
