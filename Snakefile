@@ -15,7 +15,8 @@ module_config = {
 		],
 		"requires": [
 			"dmc-corona-boot",
-			"DMC-Lua-Library"
+			"DMC-Lua-Library",
+			"dmc-states-mixin"
 		]
 	},
 	"examples": {
