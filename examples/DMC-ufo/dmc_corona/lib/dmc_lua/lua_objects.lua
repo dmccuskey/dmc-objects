@@ -39,7 +39,7 @@ SOFTWARE.
 
 -- Semantic Versioning Specification: http://semver.org/
 
-local VERSION = "1.1.1"
+local VERSION = "1.2.2"
 
 
 
@@ -131,7 +131,7 @@ local function registerCtorName( name, class )
 end
 
 -- registerDtorName
--- add names for the constructor
+-- add names for the destructor
 --
 local function registerDtorName( name, class )
 	class = class or ClassBase
@@ -158,13 +158,13 @@ local function superCall( self, ... )
 	local arg1 = args[1]
 	assert( type(arg1)=='table' or type(arg1)=='string', "superCall arg not table or string" )
 	--==--
-	-- pick off arguments	
+	-- pick off arguments
 	local parent_lock, method, params
 
-	if type(arg1) == 'table' then 
+	if type(arg1) == 'table' then
 		parent_lock = tremove( args, 1 )
 		method = tremove( args, 1 )
-	else  
+	else
 		method = tremove( args, 1 )
 	end
 	params = args
@@ -180,16 +180,17 @@ local function superCall( self, ... )
 	-- @params lock Class object with which to constrain searching
 	--
 	function findMethod( classes, name, lock )
+		if not classes then return end -- when using mixins, etc
 		local cls = nil
 		for _, class in ipairs( classes ) do
-			if not lock or class == lock then 
+			if not lock or class == lock then
 				if rawget( class, name ) then
-					cls = class 
+					cls = class
 					break
 				else
 					-- check parents for method
 					cls = findMethod( class.__parents, name )
-					if cls then break end 
+					if cls then break end
 				end
 			end
 		end
@@ -214,6 +215,9 @@ local function superCall( self, ... )
 	-- call method if found
 	--
 	c = self_dmc_super[ # self_dmc_super ]
+	-- TODO: when c==nil
+	-- if c==nil or type(c)~='table' then return end
+
 	s = findMethod( c.__parents, method, parent_lock )
 	if s then
 		tinsert( self_dmc_super, s )
@@ -221,7 +225,7 @@ local function superCall( self, ... )
 		tremove( self_dmc_super, # self_dmc_super )
 	end
 
-	-- this is the first iteration and last 
+	-- this is the first iteration and last
 	-- so clean up callstack, etc
 	--
 	if super_flag == false then
@@ -272,7 +276,7 @@ local function initializeObject( obj, params )
 	end
 	rawset( obj, '__parent_lock', nil )
 
-	return obj 
+	return obj
 end
 
 
@@ -361,15 +365,15 @@ local function blessObject( inheritance, params )
 	params.set_isClass = params.set_isClass == true and true or false
 	--==--
 	local o = params.object
+	local o_id = tostring(o)
 	local mt = {
 		__index = multiindexFunc,
 		__newindex = newindexFunc,
-		__call = function( obj, ... )
-			local p = {
-				data={...},
-				set_isClass=false
-			}
-			return initializeObject( obj, p )
+		__tostring = function(obj)
+			return obj:__tostring__(o_id)
+		end,
+		__call = function( cls, ... )
+			return cls:__ctor__( ... )
 		end
 	}
 	setmetatable( o, mt )
@@ -407,10 +411,10 @@ local function newClass( inheritance, params )
 	-- wrap single-class into table list
 	-- testing for DMC-Style objects
 	-- TODO: see if we can test for other Class libs
-	-- 
+	--
 	if inheritance.is_class == true then
 		inheritance = { inheritance }
-	elseif ClassBase and #inheritance == 0 then 
+	elseif ClassBase and #inheritance == 0 then
 		-- add default base Class
 		tinsert( inheritance, ClassBase )
 	end
@@ -420,7 +424,7 @@ local function newClass( inheritance, params )
 	initializeObject( o, params )
 
 	-- add Class property, access via getters:class()
-	o.__class = o 
+	o.__class = o
 
 	-- add Class property, access via getters:NAME()
 	o.__name = params.name
@@ -474,6 +478,11 @@ function ClassBase:__new__( ... )
 end
 
 
+function ClassBase:__tostring__( id )
+	return tostring(self.NAME) .. " " .. id
+end
+
+
 function ClassBase:__destroy__()
 end
 
@@ -505,26 +514,33 @@ function ClassBase.__getters:is_instance()
 	return not self.__is_class
 end
 
+function ClassBase.__getters:version()
+	return self.__version
+end
+
 
 function ClassBase:isa( the_class )
 
 	local isa = false
-	local cur_class = self.class 
+	local cur_class = self.class
 
 	-- test self
-	if cur_class == the_class then 
-		isa = true 
+	if cur_class == the_class then
+		isa = true
 
 	-- test parents
-	else 
+	else
 		local parents = self.__parents
 		for i=1, #parents do
-			isa = parents[i]:isa( the_class )
+			local parent, isa = parents[i], false
+			if parent.isa then
+				isa = parent:isa( the_class )
+			end
 			if isa == true then break end
 		end
 	end
 
-	return isa 
+	return isa
 end
 
 
@@ -583,14 +599,34 @@ ClassBase.superCall = superCall
 --====================================================================--
 
 
+-- makeNewClassGlobal
+-- modifies the global namespace with newClass()
+-- add or remove
+--
+local function makeNewClassGlobal( is_global )
+	is_global = is_global~=nil and is_global or true
+	if _G.newClass ~= nil then
+		print( "WARNING: newClass exists in global namespace" )
+	elseif is_global == true then
+		_G.newClass = newClass
+	else
+		_G.newClass = nil
+	end
+end
+
+makeNewClassGlobal() -- start it off
+
+
 return {
-	__superCall = superCall, -- for testing
+	__version=VERSION,
+	__superCall=superCall, -- for testing
+	setNewClassGlobal=makeNewClassGlobal,
 
-	registerCtorName = registerCtorName,
-	registerDtorName = registerDtorName,
+	registerCtorName=registerCtorName,
+	registerDtorName=registerDtorName,
 
-	inheritsFrom = inheritsFrom, -- backwards compatibility
-	newClass = newClass,
+	inheritsFrom=inheritsFrom, -- backwards compatibility
+	newClass=newClass,
 
-	Class = ClassBase
+	Class=ClassBase
 }
