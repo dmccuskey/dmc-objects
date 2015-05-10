@@ -454,7 +454,7 @@ function ComponentBase:_unsetView()
 
 		if view.__dmc_ref then view.__dmc_ref = nil end
 
-		if view.numChildren ~= nil then
+		if view.numChildren~=0 then
 			for i = view.numChildren, 1, -1 do
 				local o = view[i]
 				o.parent:remove( o )
