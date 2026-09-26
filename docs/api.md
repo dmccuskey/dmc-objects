@@ -30,7 +30,7 @@ local Objects = require 'dmc_corona.dmc_objects'
 
 Loading the module also defines two globals: `newClass` and [`getDMCObject`](#getdmcobject).
 
-The classes and `newClass()` come from [lua-objects](https://github.com/dmccuskey/lua-objects) (`lib/dmc_lua/lua_objects.lua` and `lua_class.lua` in `dmc_corona/`); dmc-objects adds the two component classes.
+`newClass()` and the class model come from [lua-class](https://github.com/dmccuskey/lua-class) and `ObjectBase` from [lua-objects](https://github.com/dmccuskey/lua-objects) (`lib/dmc_lua/lua_class.lua` and `lua_objects.lua` in `dmc_corona/`); dmc-objects adds the two component classes.
 
 ## newClass
 

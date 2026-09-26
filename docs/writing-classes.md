@@ -179,7 +179,7 @@ end
 
 `superCall()` finds the class that defines the method and continues the search in that class's parents, so it works at every level of a deep hierarchy. If no parent has the method, it returns `nil` instead of failing.
 
-A class can have several parents: `newClass( { ComponentBase, SomeMixin }, { name="..." } )`. Lookups search the parents in the order listed; `self:superCall( SomeMixin, '__init__', params )` calls one parent's method. lua-objects' own `ObjectBase` is built this way, from its base class and the events mixin. See [lua-objects](https://github.com/dmccuskey/lua-objects) for multiple inheritance and mixins.
+A class can have several parents: `newClass( { ComponentBase, SomeMixin }, { name="..." } )`. Lookups search the parents in the order listed; `self:superCall( SomeMixin, '__init__', params )` calls one parent's method. lua-objects' own `ObjectBase` is built this way, from its base class and the events mixin. See lua-class's [Multiple Inheritance](https://github.com/dmccuskey/lua-class/blob/master/docs/api.md#multiple-inheritance) for the details.
 
 ## Getters and Setters
 

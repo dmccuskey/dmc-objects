@@ -14,7 +14,8 @@ New here? The [Quick Start](../README.md#quick-start) writes a class and moves a
 
 ## Internals
 
-- [lua-objects](https://github.com/dmccuskey/lua-objects): the class model underneath, for plain Lua
+- [lua-class](https://github.com/dmccuskey/lua-class): the class model underneath (`newClass()`, `superCall()`, getters and setters, multiple inheritance), for plain Lua
+- [lua-objects](https://github.com/dmccuskey/lua-objects): `ObjectBase` and its events, for plain Lua
 
 ## Contribute
 
