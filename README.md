@@ -1,64 +1,160 @@
-dmc-objects
-===========
+# dmc-objects
 
-Advanced object oriented library for Corona SDK and Lua OOP
+Object-oriented classes for Solar2D (formerly Corona SDK): write your game objects as classes that you can move, animate and listen to like display objects.
 
-# Overview #
-
-The `dmc-objects` modules power advanced, object-oriented development when using the Corona SDK. It provides:
-
-* a classical model of object oriented programming
-* a simple structure for creating/initializing/destroying Lua objects
-* class getters and setters
-* multiple inheritance
-* support for mixins
-* enhanced method access on supers
-* an object API similar to Corona display objects
-* fast execution through structure and optimizations
-
-_**Though it's not just for Corona - the top-level object classes can be used when developing software in plain Lua.**_
-
-Note: `dmc-objects` is a subclass of `lua-objects` and the latter does most of the heavy lifting. In this way `dmc-objects` not only provides a development framework for Corona SDK, it also provides a great example on how to subclass `lua-objects` with custom behavior.
-
-
-**Documentation & Examples**
-
-Additional documentation is online at: [docs.davidmccuskey.com](http://docs.davidmccuskey.com/display/docs/dmc-objects.lua)
-
-There are several examples located in the folder `examples` which show how to setup OOP structures in Lua. Among these are some original Corona examples which have been modified to use `dmc-objects` and fit into an OOP style of programming.
-
-
-**Questions or Comments**
-
-If you have questions or comments you can either (preferred order):
-* send me an email: corona-lib at davidmccuskey com
-* send a PM @ coronalabs.com: @dmccuskey
-* post an issue here on github
-* post to the Corona forums: http://forums.coronalabs.com
-
-
-**Issues**
-
-If you discover any bugs, please post them here on github: [dmc-corona-library issues](https://github.com/dmccuskey/dmc-objects/issues)
-
-
-
-## Installation & Use ##
-
-For easy installation, copy the following items at the root-level of your Corona project:
-
-* The entire `dmc_corona` folder
-* `dmc_corona_boot.lua`
-* `dmc_corona.cfg`
-
-With this setup, modules should be imported like so:
+A class wraps a display group, and instances work with `transition.to()`, `x`/`y`, `insert()` and event listeners:
 
 ```lua
 local Objects = require 'dmc_corona.dmc_objects'
+
+local Ship = Objects.newClass( Objects.ComponentBase, { name="Ship" } )
+
+function Ship:__createView__()
+	self:superCall( '__createView__' )
+	--==--
+	self:insert( display.newImageRect( 'ship.png', 64, 64 ) )
+end
+
+local ship = Ship:new()
+transition.to( ship, { time=500, x=200, alpha=0.5 } )
 ```
 
+## Features
 
-The library has been designed to give a lot of flexibility where it is stored in your project. For more information regarding installation, visit how to [install the library](http://docs.davidmccuskey.com/display/docs/Install+the+DMC+Corona+Library).
+- Classes with `newClass()`, multiple inheritance and mixins, built on [lua-objects](https://github.com/dmccuskey/lua-objects)
+- A component base class backed by a display group: instances have `x`, `y`, `alpha`, `rotation`, `insert()`, `toFront()`, ... and work with transitions
+- A physics base class that adds the physics body properties and methods (`setLinearVelocity()`, `applyForce()`, ...)
+- A set construction and teardown order: hooks for properties, display objects and listeners, undone in reverse by `removeSelf()`
+- Getters and setters: `obj.speed = 45` can run your code
+- `superCall()` to reach any method of a parent class
+- Events: `addEventListener()` and `dispatchEvent()`, Solar2D-style or with a type and data
+- `isa()`, `is_class`, `is_instance` and a printable class name
+- `optimize()` copies inherited methods onto an object for faster lookups
+- Pure Lua, no plugins; MIT licensed
 
+## Quick Start
 
+This writes a class, creates an instance of it, moves it and removes it, in about 10 minutes, in the Solar2D Simulator on macOS or Windows.
 
+Prerequisites: the [Solar2D](https://solar2d.com/) Simulator and a copy of this repository (`git clone https://github.com/dmccuskey/dmc-objects.git`, or download the ZIP from GitHub).
+
+### 1. Copy the Library into Your Project
+
+Copy these from this repository into the root of your project folder:
+
+```text
+dmc_corona_boot.lua     loader for the DMC libraries
+dmc_corona.cfg          configuration
+dmc_corona/             dmc-objects and the libraries it uses
+```
+
+**Going further:** keep the libraries in a subfolder, or combine several DMC libraries ([dmc-corona-boot Configuration](https://github.com/dmccuskey/dmc-corona-boot/blob/master/docs/configuration.md)).
+
+### 2. Write a Class
+
+Create `badge.lua` in the project folder, a class for a round badge with a label:
+
+```lua
+local Objects = require 'dmc_corona.dmc_objects'
+
+local Badge = Objects.newClass( Objects.ComponentBase, { name="Badge" } )
+
+-- properties
+function Badge:__init__( params )
+	params = params or {}
+	self:superCall( '__init__', params )
+	--==--
+	self._label = params.label or '?'
+	self._circle = nil
+	self._text = nil
+end
+
+-- display objects
+function Badge:__createView__()
+	self:superCall( '__createView__' )
+	--==--
+	self._circle = display.newCircle( 0, 0, 100 )
+	self._circle:setFillColor( 0.2, 0.5, 0.9 )
+	self:insert( self._circle )
+
+	self._text = display.newText( self._label, 0, 0, native.systemFont, 80 )
+	self:insert( self._text )
+end
+
+function Badge:__undoCreateView__()
+	self._text:removeSelf()
+	self._text = nil
+	self._circle:removeSelf()
+	self._circle = nil
+	--==--
+	self:superCall( '__undoCreateView__' )
+end
+
+-- a property with a getter and a setter
+function Badge.__getters:label()
+	return self._label
+end
+function Badge.__setters:label( value )
+	self._label = value
+	self._text.text = value
+end
+
+return Badge
+```
+
+Then create `main.lua` with:
+
+```lua
+local Badge = require 'badge'
+
+local badge = Badge:new{ label='A' }
+badge.x, badge.y = display.contentCenterX, 200
+
+print( badge, badge:isa( Badge ), badge.label )
+```
+
+Open the project in the Simulator. A blue badge labeled "A" appears at the top of the screen, and the console shows:
+
+```text
+Badge (table: 0x600001a2c040)	true	A
+```
+
+If it shows `module 'dmc_corona.dmc_objects' not found` instead, `dmc_corona/` is missing from the root of the project folder. `The module 'lib.dmc_lua.lua_objects' not found` means `dmc_corona.cfg` is missing there.
+
+**Going further:** what each hook is for, and how to lay out a class file ([Writing Classes](docs/writing-classes.md)).
+
+### 3. Move It and Remove It
+
+Add this to the end of `main.lua`:
+
+```lua
+transition.to( badge, { time=1000, y=500, alpha=0.5 } )
+badge.label = 'B'
+
+badge:addEventListener( 'tap', function()
+	badge:removeSelf()
+	print( 'removed' )
+end )
+```
+
+The Simulator restarts the app when the file is saved. The badge now reads "B" and slides down while it fades to half transparent:
+
+<img src="docs/images/quick-start-step2.png" width="160" alt="Step 2: a blue badge labeled A at the top of the screen"> <img src="docs/images/quick-start-step3.png" width="160" alt="Step 3: the badge, now labeled B, lower down and half transparent">
+
+Click it: it disappears and the console shows `removed`. `removeSelf()` ran `__undoCreateView__()`, which removed the circle and the text.
+
+**Going further:** send your own events from a class ([Events](docs/writing-classes.md#events)), or see complete apps in [examples](examples/).
+
+To update, copy `dmc_corona_boot.lua` and `dmc_corona/` again from the newer version. Keep your own `dmc_corona.cfg` if you have changed it.
+
+## Documentation
+
+- [Writing Classes](docs/writing-classes.md): the class file layout, the construction and teardown hooks, events, speed
+- [API reference](docs/api.md): `newClass()`, the component and physics classes, what they forward to the display group, known issues
+- [Examples](examples/): five apps, including two Solar2D samples rewritten as classes
+
+Everything else is listed on the [documentation home](docs/README.md).
+
+## License
+
+dmc-objects is released under the [MIT License](LICENSE).
