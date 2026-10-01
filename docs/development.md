@@ -28,19 +28,18 @@ The build copies the sibling checkouts as they are on disk, on whatever branch e
 
 ## Testing
 
-The tests are in `tests/dmc_objects_spec.lua` ([lunatest](https://github.com/silentbicycle/lunatest)). They need Solar2D: open the repository's root folder in the Simulator, and `main.lua` runs them and prints the results to the console:
+The tests are in `tests/dmc_objects_spec.lua` ([lunatest](https://github.com/silentbicycle/lunatest)). Run them with plain Lua 5.1, with stand-ins for the Solar2D globals they touch (`display.newGroup()`, `system`); it needs the `dkjson` rock:
 
-```text
--- Starting suite "tests.dmc_objects_spec", 7 test(s)
-  ...FF..---- Testing finished, with 33 assertion(s) ----  5 passed, 2 failed, 0 error(s), 0 skipped.
-FAIL: tests.dmc_objects_spec.test_objectBaseBasics: Expected "Object Base", got "Object Class" - name is incorrect
+```sh
+tests/run_unit.sh                  # uses ../tools/lua51/bin/lua
+LUA=lua5.1 tests/run_unit.sh       # or another Lua 5.1
 ```
 
-The two failures are out of date tests: they expect the class names from before the classes were renamed. The tests cover the class basics, inheritance and multiple inheritance, not the component classes' forwarding or the construction hooks.
+To run them in Solar2D, open the repository's root folder in the Simulator: `main.lua` runs them and prints the results to the console:
 
-## Possible Future Changes
+```text
+-- Starting suite "tests.dmc_objects_spec", 12 test(s)
+  ............---- Testing finished, with 69 assertion(s) ----  12 passed, 0 failed, 0 error(s), 0 skipped.
+```
 
-Each needs discussion and a concrete use case before it is worked on.
-
-- Forward the anchor properties (`anchorX`, `anchorY`, `anchorChildren`) to the view, and drop the Graphics 1.0 members listed in [Known Issues](api.md#known-issues).
-- Tests that run in plain Lua, with stand-ins for `display`, like dmc-sockets' `tests/run_unit.sh`.
+They cover the class basics, inheritance and multiple inheritance, the module's exports, and the component classes' view, anchors and events. Each example app is a further check: run it in the Simulator after a change.

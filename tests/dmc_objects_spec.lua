@@ -44,7 +44,8 @@ function test_moduleBasics()
 
 	assert_equal( _G.getDMCObject( { __dmc_ref=true } ), true, "should be true" )
 
-	assert_error( "not true", function() _G.getDMCObject( {} ) end )
+	local t = {}
+	assert_equal( _G.getDMCObject( t ), t, "should be the table itself" )
 
 end
 
@@ -58,7 +59,7 @@ end
 
 function test_objectBaseBasics()
 
-	assert_equal( ObjectBase.NAME, "Object Class", "name is incorrect" )
+	assert_equal( ObjectBase.NAME, "Object Base", "name is incorrect" )
 	assert_equal( type(ObjectBase.new), 'function', "should be function" )
 	assert_equal( type(ObjectBase.removeSelf), 'function', "should be function" )
 
@@ -294,10 +295,117 @@ end
 
 function test_coronaBaseBasics()
 
-	assert_equal( ComponentBase.NAME, "Component Class", "name is incorrect" )
+	assert_equal( ComponentBase.NAME, "Component", "name is incorrect" )
 	assert_equal( type(ComponentBase.new), 'function', "should be function" )
 
 	assert_equal( type(ComponentBase.isa), 'function', "should be function" )
+
+	-- Graphics 1.0 members are gone; the anchor constants stay
+	assert_nil( ComponentBase.setReferencePoint, "should be removed" )
+	assert_equal( type(ComponentBase.TopLeftReferencePoint), 'table', "should be table" )
+
+end
+
+
+function test_moduleExports()
+
+	local LuaObjects = require 'lib.dmc_lua.lua_objects'
+
+	assert_equal( Objects.__version, "2.2.0", "should be dmc-objects' version" )
+	assert_equal( Objects.ObjectBase, LuaObjects.ObjectBase, "should be lua-objects' ObjectBase" )
+	assert_equal( Objects.newClass, LuaObjects.newClass, "should be lua-class' newClass" )
+
+	-- lua-objects' own table is left alone
+	assert_nil( LuaObjects.ComponentBase, "should not be added to lua-objects" )
+	assert_false( LuaObjects.__version == Objects.__version, "should be lua-objects' version" )
+
+end
+
+
+function test_componentView()
+
+	local ClassA = newClass( ComponentBase, { name="Comp A" } )
+	local obj, view
+
+	-- a class has no view, only an instance
+	assert_nil( rawget( ComponentBase, 'view' ), "class should have no view" )
+	assert_nil( rawget( ClassA, 'view' ), "subclass should have no view" )
+
+	obj = ClassA:new()
+	view = obj.view
+	assert_equal( type(view), 'table', "instance should have a view" )
+	assert_equal( _G.getDMCObject( view ), obj, "view should lead to object" )
+
+	obj:removeSelf()
+	assert_nil( obj.view, "view should be gone" )
+
+end
+
+
+function test_componentSkippedSuperCall()
+
+	local ClassA = newClass( ComponentBase, { name="Comp A" } )
+
+	function ClassA:__init__( params )
+		-- no superCall()
+	end
+
+	assert_error( function() ClassA:new() end )
+
+end
+
+
+function test_componentAnchor()
+
+	local obj = ComponentBase:new()
+
+	obj:setAnchor( obj.TopLeftReferencePoint )
+	assert_equal( obj.view.anchorX, 0, "anchorX incorrect" )
+	assert_equal( obj.view.anchorY, 0, "anchorY incorrect" )
+
+	obj:setAnchor( 1, 0.5 )
+	assert_equal( obj.view.anchorX, 1, "anchorX incorrect" )
+	assert_equal( obj.view.anchorY, 0.5, "anchorY incorrect" )
+
+	obj:setAnchor( 0.25 )
+	assert_equal( obj.view.anchorX, 0.25, "anchorX incorrect" )
+	assert_equal( obj.view.anchorY, 0.5, "anchorY should be unchanged" )
+
+	obj.anchorX, obj.anchorY = 0, 1
+	assert_equal( obj.view.anchorX, 0, "anchorX not forwarded" )
+	assert_equal( obj.view.anchorY, 1, "anchorY not forwarded" )
+	assert_equal( obj.anchorY, 1, "anchorY getter incorrect" )
+
+	obj.anchorChildren = true
+	assert_true( obj.view.anchorChildren, "anchorChildren not forwarded" )
+	assert_true( obj.anchorChildren, "anchorChildren getter incorrect" )
+
+	obj:removeSelf()
+
+end
+
+
+function test_componentEvents()
+
+	local obj = ComponentBase:new()
+	local received
+
+	obj:addEventListener( 'my_event', function( e ) received = e end )
+
+	-- raw event goes through the view
+	obj:dispatchRawEvent{ name='my_event', value=1 }
+	assert_equal( received and received.value, 1, "raw event not received" )
+
+	-- dmc-style event uses the object's event function
+	obj:setEventFunc( function( self, e_type, data )
+		return { name='my_event', type=e_type, value=data }
+	end )
+	received = nil
+	obj:dispatchEvent( 'changed', 2 )
+	assert_equal( received and received.type, 'changed', "event func not used" )
+	assert_equal( received.value, 2, "event func not used" )
+
+	obj:removeSelf()
 
 end
 

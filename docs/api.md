@@ -1,6 +1,6 @@
 # API Reference
 
-Everything dmc-objects provides, as of version 2.1.2. [Writing Classes](writing-classes.md) explains how the pieces are used together.
+Everything dmc-objects provides, as of version 2.2.0. [Writing Classes](writing-classes.md) explains how the pieces are used together.
 
 | name | what it is |
 |---|---|
@@ -27,10 +27,11 @@ local Objects = require 'dmc_corona.dmc_objects'
 | `Objects.registerCtorName( name, class )`, `Objects.registerDtorName( name, class )` | add another name for the constructor (`new`) or destructor (`destroy`) on `class` (default: the root class) |
 | `Objects.inheritsFrom( class )` | the 1.x way to create a class; same as `newClass( class )` |
 | `Objects.setNewClassGlobal()` | see [newClass](#newclass) |
+| `Objects.__version` | dmc-objects' version, e.g. `"2.2.0"` |
 
 Loading the module also defines two globals: `newClass` and [`getDMCObject`](#getdmcobject).
 
-`newClass()` and the class model come from [lua-class](https://github.com/dmccuskey/lua-class) and `ObjectBase` from [lua-objects](https://github.com/dmccuskey/lua-objects) (`lib/dmc_lua/lua_class.lua` and `lua_objects.lua` in `dmc_corona/`); dmc-objects adds the two component classes.
+`newClass()` and the class model come from [lua-class](https://github.com/dmccuskey/lua-class) and `ObjectBase` from [lua-objects](https://github.com/dmccuskey/lua-objects) (`lib/dmc_lua/lua_class.lua` and `lua_objects.lua` in `dmc_corona/`); dmc-objects adds the two component classes. Its module is a copy of lua-objects' with those added, so `require 'lib.dmc_lua.lua_objects'` still gives lua-objects' own table, unchanged.
 
 ## newClass
 
@@ -81,25 +82,27 @@ A base class without a view, for objects in plain Lua. It has the hooks `__init_
 
 ## ComponentBase
 
-`ComponentBase` inherits from `ObjectBase`. Each instance has a display group, `obj.view`, created in `__init__()` and removed with everything in it by `__undoInit__()`. Use `obj.view` where Solar2D needs a real display object. (`obj.display` is an older name for it.)
+`ComponentBase` inherits from `ObjectBase`. Each instance has a display group, `obj.view`, created in `__init__()` and removed with everything in it by `__undoInit__()`; a class has none, so `obj.view` is `nil` after `obj:removeSelf()`. Use `obj.view` where Solar2D needs a real display object. (`obj.display` is an older name for it.)
 
 It adds the hooks `__createView__()` and `__undoCreateView__()`, and forwards these to the view, so an instance can be used like a display group:
 
 | | forwarded to `obj.view` |
 |---|---|
-| properties | `alpha`, `height`, `isHitTestMasked`, `isHitTestable`, `isVisible`, `maskRotation`, `maskScaleX`, `maskScaleY`, `maskX`, `maskY`, `rotation`, `width`, `x`, `xScale`, `y`, `yScale` |
+| properties | `alpha`, `anchorChildren`, `anchorX`, `anchorY`, `height`, `isHitTestMasked`, `isHitTestable`, `isVisible`, `maskRotation`, `maskScaleX`, `maskScaleY`, `maskX`, `maskY`, `rotation`, `width`, `x`, `xScale`, `y`, `yScale` |
 | read-only | `contentBounds`, `contentHeight`, `contentWidth`, `numChildren`, `parent` |
-| methods | `insert()`, `remove()`, `addEventListener()`, `removeEventListener()`, `dispatchEvent()`, `contentToLocal()`, `localToContent()`, `rotate()`, `scale()`, `translate()`, `toBack()`, `toFront()`, `setMask()` (untested) |
+| methods | `insert()`, `remove()`, `addEventListener()`, `removeEventListener()`, `dispatchEvent()`, `dispatchRawEvent()`, `contentToLocal()`, `localToContent()`, `rotate()`, `scale()`, `translate()`, `toBack()`, `toFront()`, `setMask()` (untested) |
 
-Anything else, such as `anchorX`, `anchorY` or `anchorChildren`, isn't forwarded: set it on `obj.view`. Setting `obj.anchorX` stores a value on the instance and changes nothing on screen.
+Anything else isn't forwarded: set it on `obj.view`. Setting an unforwarded property on `obj` stores a value on the instance and changes nothing on screen.
 
-The events methods go to the view, not to `ObjectBase`'s listener list, so Solar2D events (`tap`, `touch`) and your own events share one set of listeners. `dispatchEvent()` takes a Solar2D event table (`{ name='...' }`) or the `( type, data, params )` form above. `dispatchRawEvent()` and `setEventFunc()` still work on `ObjectBase`'s list, so on a component their events never reach a listener (see [Known Issues](#known-issues)).
+The events methods go to the view, not to `ObjectBase`'s listener list, so Solar2D events (`tap`, `touch`) and your own events share one set of listeners. `dispatchEvent()` takes a Solar2D event table (`{ name='...' }`) or the `( type, data, params )` form above, which it builds with the function set by `setEventFunc()`. `dispatchRawEvent()` sends an event table as it is.
 
 It also adds:
 
 | method | |
 |---|---|
 | `obj:show()`, `obj:hide()` | set `isVisible` |
+| `obj:setAnchor( anchorX, anchorY )` | sets the view's `anchorX` and `anchorY`; either can be left out |
+| `obj:setAnchor( obj.TopLeftReferencePoint )` | the same, with one of the anchor constants: `TopLeftReferencePoint`, `TopCenterReferencePoint`, `TopRightReferencePoint`, `CenterLeftReferencePoint`, `CenterReferencePoint`, `CenterRightReferencePoint`, `BottomLeftReferencePoint`, `BottomCenterReferencePoint`, `BottomRightReferencePoint` |
 | `obj:setTouchBlock( displayObject )` | makes `displayObject` swallow touches, so they don't reach objects behind it |
 | `obj:unsetTouchBlock( displayObject )` | undoes it |
 
@@ -131,9 +134,4 @@ dmc-objects has no settings. Its `dmc_corona.cfg` section, `[DMC_OBJECTS]`, can 
 
 ## Known Issues
 
-- **Graphics 1.0 leftovers.** `ComponentBase` still has `setReferencePoint()`, the `*ReferencePoint` constants, `xReference`, `yReference`, `xOrigin`, `yOrigin` and `stageBounds`, from Corona's old graphics engine. Don't use them: `setReferencePoint()` makes the Solar2D Simulator quit, and `xReference` and `yReference` return `nil`. Set `anchorX` and `anchorY` on `obj.view` instead.
-- **`dispatchRawEvent()` and `setEventFunc()` don't work on components.** Use `dispatchEvent()` with an event table (`obj:dispatchEvent{ name='my_event', ... }`) to send an event of your own making.
-- **`setAnchor()` does nothing** when called as `obj:setAnchor( obj.TopLeftReferencePoint )` or `obj:setAnchor( 0, 1 )`: it reads the wrong arguments. Set `obj.view.anchorX` and `anchorY`.
-- **Each `ComponentBase` class has its own empty display group**, created when the class is. After `obj:removeSelf()`, `obj.view` finds the class's group instead of returning `nil`.
-- `Objects.__version` is lua-class's version, not dmc-objects'. dmc-objects doesn't export its own.
-- `Objects.setNewClassGlobal( false )` doesn't remove the global `newClass`.
+None known. Fixed in 2.2.0: `setAnchor()` read the wrong arguments; the anchor properties weren't forwarded; `dispatchRawEvent()` and `setEventFunc()` didn't reach a component's listeners; each component class had a display group of its own; `Objects.__version` was lua-class's. The Graphics 1.0 members (`setReferencePoint()`, `xReference`, `yReference`, `xOrigin`, `yOrigin`, `stageBounds`) were removed: `setReferencePoint()` made the Solar2D Simulator quit and the others returned `nil`. Set `anchorX` and `anchorY` instead.
