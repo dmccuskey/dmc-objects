@@ -19,13 +19,15 @@ New here? The [Quick Start](../README.md#quick-start) writes a class and moves a
 
 ## Contribute
 
-- [Development](development.md): which files are generated, building, tests, possible future changes
+- [Development](development.md): which files are generated, building, tests
+- [Changelog](../CHANGELOG.md)
 - [Issues](https://github.com/dmccuskey/dmc-objects/issues)
 
 ## Project Structure
 
 ```text
 README.md                   landing page and Quick Start
+CHANGELOG.md
 LICENSE
 docs/                       this documentation
 └── images/                 screenshots for the README
@@ -41,5 +43,6 @@ main.lua                    runs the tests in the Solar2D Simulator
 Snakefile                   build rules for the generated copies
 tests/
 ├── dmc_objects_spec.lua
-└── lunatest.lua            test framework (Scott Vokes, MIT)
+├── lunatest.lua            test framework (Scott Vokes, MIT)
+└── run_unit.sh             runs the tests with plain Lua 5.1
 ```

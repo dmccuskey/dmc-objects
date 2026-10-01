@@ -152,6 +152,7 @@ To update, copy `dmc_corona_boot.lua` and `dmc_corona/` again from the newer ver
 - [Writing Classes](docs/writing-classes.md): the class file layout, the construction and teardown hooks, events, speed
 - [API reference](docs/api.md): `newClass()`, the component and physics classes, what they forward to the display group, known issues
 - [Examples](examples/): five apps, including two Solar2D samples rewritten as classes
+- [Changelog](CHANGELOG.md)
 
 Everything else is listed on the [documentation home](docs/README.md).
 
