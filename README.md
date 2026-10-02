@@ -34,7 +34,7 @@ transition.to( ship, { time=500, x=200, alpha=0.5 } )
 
 ## Quick Start
 
-This writes a class, creates an instance of it, moves it and removes it, in about 10 minutes, in the Solar2D Simulator on macOS or Windows.
+The following code will get you up and running in about 10 minutes in the Solar2D Simulator on macOS or Windows. It writes a class, creates an instance of it, moves it and removes it.
 
 Prerequisites: the [Solar2D](https://solar2d.com/) Simulator and a copy of this repository (`git clone https://github.com/dmccuskey/dmc-objects.git`, or download the ZIP from GitHub).
 
