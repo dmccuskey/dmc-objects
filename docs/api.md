@@ -1,6 +1,6 @@
 # API Reference
 
-Everything dmc-objects provides, as of version 2.2.0. [Writing Classes](writing-classes.md) explains how the pieces are used together.
+Everything dmc-objects provides, as of version 2.2.1. [Writing Classes](writing-classes.md) explains how the pieces are used together.
 
 | name | what it is |
 |---|---|
@@ -27,7 +27,7 @@ local Objects = require 'dmc_corona.dmc_objects'
 | `Objects.registerCtorName( name, class )`, `Objects.registerDtorName( name, class )` | add another name for the constructor (`new`) or destructor (`destroy`) on `class` (default: the root class) |
 | `Objects.inheritsFrom( class )` | the 1.x way to create a class; same as `newClass( class )` |
 | `Objects.setNewClassGlobal()` | see [newClass](#newclass) |
-| `Objects.__version` | dmc-objects' version, e.g. `"2.2.0"` |
+| `Objects.__version` | dmc-objects' version, e.g. `"2.2.1"` |
 
 Loading the module also defines two globals: `newClass` and [`getDMCObject`](#getdmcobject).
 
@@ -134,4 +134,4 @@ dmc-objects has no settings. Its `dmc_corona.cfg` section, `[DMC_OBJECTS]`, can 
 
 ## Known Issues
 
-None known. Fixed in 2.2.0: `setAnchor()` read the wrong arguments; the anchor properties weren't forwarded; `dispatchRawEvent()` and `setEventFunc()` didn't reach a component's listeners; each component class had a display group of its own; `Objects.__version` was lua-class's. The Graphics 1.0 members (`setReferencePoint()`, `xReference`, `yReference`, `xOrigin`, `yOrigin`, `stageBounds`) were removed: `setReferencePoint()` made the Solar2D Simulator quit and the others returned `nil`. Set `anchorX` and `anchorY` instead.
+None known. Fixed in 2.2.1: a component whose view isn't a group couldn't be removed. Fixed in 2.2.0: `setAnchor()` read the wrong arguments; the anchor properties weren't forwarded; `dispatchRawEvent()` and `setEventFunc()` didn't reach a component's listeners; each component class had a display group of its own; `Objects.__version` was lua-class's. The Graphics 1.0 members (`setReferencePoint()`, `xReference`, `yReference`, `xOrigin`, `yOrigin`, `stageBounds`) were removed: `setReferencePoint()` made the Solar2D Simulator quit and the others returned `nil`. Set `anchorX` and `anchorY` instead.

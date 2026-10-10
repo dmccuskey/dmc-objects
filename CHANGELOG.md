@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.1 (2026-10-09)
+
+### Fixed
+
+- A component whose view isn't a group (an image given to `_setView()`) can be removed: `removeSelf()` raised "'for' initial value must be a number".
+
 ## 2.2.0 (2026-10-01)
 
 ### Fixed
