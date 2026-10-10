@@ -311,7 +311,7 @@ function test_moduleExports()
 
 	local LuaObjects = require 'lib.dmc_lua.lua_objects'
 
-	assert_equal( Objects.__version, "2.2.0", "should be dmc-objects' version" )
+	assert_equal( Objects.__version, "2.2.1", "should be dmc-objects' version" )
 	assert_equal( Objects.ObjectBase, LuaObjects.ObjectBase, "should be lua-objects' ObjectBase" )
 	assert_equal( Objects.newClass, LuaObjects.newClass, "should be lua-class' newClass" )
 
@@ -381,6 +381,29 @@ function test_componentAnchor()
 	assert_true( obj.anchorChildren, "anchorChildren getter incorrect" )
 
 	obj:removeSelf()
+
+end
+
+
+-- a view set by _setView() can be any display object, eg an image,
+-- which has no children to take out when it's removed
+--
+function test_componentViewNotAGroup()
+
+	local ClassA = newClass( ComponentBase, { name="Comp A" } )
+	local image = { removeSelf=function( self ) self.removed = true end }
+
+	function ClassA:__createView__()
+		self:superCall( '__createView__' )
+		self:_setView( image )
+	end
+
+	local obj = ClassA:new()
+	assert_equal( obj.view, image, "view should be the image" )
+
+	obj:removeSelf()
+	assert_true( image.removed, "image should be removed" )
+	assert_nil( obj.view, "should have no view" )
 
 end
 
